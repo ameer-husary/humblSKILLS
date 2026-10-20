@@ -59,6 +59,14 @@ tl.fromTo('.hero', { opacity: 0, y: 60, scale: 0.96 },
 // supporting items follow the hero by 3-6 frames each, smaller travel, softer spring
 ```
 
+### Shipped helpers: `assets/vendor/motion.js`
+`video-init.sh` copies it and `index.html` loads it after GSAP, so every scene can call
+`window.motion`: `springEase`, `glide`, `drift` (constant velocity, for pushes that cross cuts),
+`words` (left-to-right resolve: blur and opacity glide, only the rise springs, because a spring's
+overshoot on blur made later words look sharper than earlier ones), `count`, `push`, `morph`
+(transform-only box-to-box) and `lead` (move the cursor to a target). Each encodes a lesson from the
+test films; extend it rather than pasting new copies into scenes.
+
 ### The banned list is a taste layer, not a determinism check
 HyperFrames `check` already rejects seek-unsafe motion. `video-gate.py` adds warnings (file:line) for
 default GSAP eases (`none`, `linear`, `power1*`, `sine*`), CSS `transition:` and default CSS timing
@@ -82,7 +90,9 @@ empty ground for 0.4-0.7 s before the next scene drew itself (pair scores 4-7). 
   dead half-second the freeze rule catches.
 - **A slow push must be continuous across cuts.** Scene A pushing 1 -> 1.035 and scene B restarting
   at 1 reads as a visible scale snap at every cut (earshot's cut detector even marked two). Alternate:
-  A 1 -> 1.02, B 1.02 -> 1, so each scene starts at the scale the last one ended on.
+  A 1 -> 1.02, B 1.02 -> 1, so each scene starts at the scale the last one ended on, and push at
+  constant velocity (`motion.drift`): an eased push stops at both ends, which read as a frozen
+  dashboard across a cut.
 - **The cursor always has a target** (the word just resolved, the row being checked, the bar that
   moved) and never parks on top of text: critics marked idle or colliding cursors in 4 of 6 scenes.
 

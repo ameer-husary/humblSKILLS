@@ -17,7 +17,7 @@ description: >
   design direction use smart-frontend-design. Do NOT use for non-frontend
   work or static visual design with no motion.
 license: MIT
-compatibility: Requires bash, POSIX utilities (awk, sed, find, grep), python3, writable filesystem at the skill target path. The video loop also needs Node 22+ (npx hyperframes), ffmpeg/ffprobe, Chrome, and for sound a Python with earshot installed (CPU torch, ~1.1 GB models on first listen).
+compatibility: Requires bash, POSIX utilities (awk, sed, find, grep), python3, writable filesystem at the skill target path. The video loop also needs Node 22+ (npx hyperframes), ffmpeg/ffprobe, Chrome, and for sound a Python with earshot installed (CPU torch, ~1.1 GB models on first listen); narration recommends Chatterbox TTS in its own Python 3.11 venv (ask the user before installing, ~2 GB), with macOS say as the fallback.
 metadata:
   author: jjfantini
   version: "0.6.0"
@@ -182,7 +182,8 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
    and the smart-watch skill on `ref.mp4` for the transcript; fill the style sheet in your own words.
 2. Plan with the user: the message, the story spine, one narration line per scene. Measure each line
    (`say -o` + ffprobe) and size scenes as line + 0.5-1 s.
-3. `scenes.json`: `"audio": "voice"`, `"cut_on": "free"`, a `voice` engine, a `bed`. Each scene's
+3. `scenes.json`: `"audio": "voice"`, `"cut_on": "free"`, a `voice` engine (ask the user to install
+   Chatterbox for an expressive voice; `say` is the flat fallback), a `bed`, `max_iterations` 8. Each scene's
    `data-cues` holds its line (`kind: vo`) and its UI ticks; words resolve with the voice.
 4. Loop, critics, `--deliver` as in Example 3. Keep the reference's grammar, not its brand: its
    grays may fail contrast, its master may clip - the gate stays at AA and -1 dBTP.

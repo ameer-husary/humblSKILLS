@@ -104,6 +104,7 @@ Context -> categories. See `## Wiki` below for the concept enumeration.
 - [beautiful-ui.md](raw/beautiful-ui.md) - cited by: references/wiki/lib/beautiful-ui/usage.md
 - [border-beam.md](raw/border-beam.md) - cited by: references/wiki/lib/beams/usage.md
 - [canvas-ui.md](raw/canvas-ui.md) - cited by: references/wiki/lib/canvas-ui/usage.md
+- [chatterbox.md](raw/chatterbox.md) - (not cited; orphan)
 - [claude-remotion-skill.md](raw/claude-remotion-skill.md) - cited by: references/wiki/video/loop/reference-assets.md, references/wiki/video/loop/self-critique.md
 - [earshot.md](raw/earshot.md) - cited by: references/wiki/video/loop/plan.md, references/wiki/video/loop/reference-style.md, references/wiki/video/loop/self-critique.md, references/wiki/video/loop/sound.md
 - [frontend-design-motion-principles.md](raw/frontend-design-motion-principles.md) - cited by: references/wiki/lang/react/animation.md, references/wiki/motion/principles/design.md

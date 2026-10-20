@@ -37,6 +37,7 @@ cp "$tpl/PLAN.md" "$dir/PLAN.md"
 mkdir -p "$dir/assets/vendor"
 curl -fsSL "https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" -o "$dir/assets/vendor/gsap.min.js" \
   || { echo "video-init.sh: could not download gsap 3.14.2" >&2; exit 1; }
+cp "$tpl/motion.js" "$dir/assets/vendor/motion.js"
 cat > "$dir/assets/SOURCES.md" <<'EOF'
 # Asset sources
 
@@ -44,6 +45,7 @@ One line per file in assets/: `<filename> - <where it came from> - <license or o
 The loop fails a scene that uses an asset not listed here, or a placeholder image host.
 
 gsap.min.js - GSAP 3.14.2 from jsDelivr (vendor/) - GreenSock standard license
+motion.js - seek-safe motion helpers from the smart-animation skill (vendor/) - MIT
 EOF
 cat >> "$dir/.gitignore" <<'EOF'
 renders/

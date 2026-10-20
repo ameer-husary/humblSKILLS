@@ -9,7 +9,8 @@ missing from the beat sheet, or the approved line is empty. Replace every TODO, 
 - audience: TODO
 - where it plays and how (feed, landing page, in-app; muted by default? autoplay? loop?): TODO
 - length and aspect (e.g. 20 s, 16:9): TODO
-- sound mode (sfx default / music / none) and, for music, the track: TODO
+- sound mode (sfx default / voice / music / none); for voice, Chatterbox installed (recommended) or the macOS say fallback; for music, the track: TODO
+- iteration budget (max_iterations; 8 for 5+ scenes): TODO
 - must show / must not show: TODO
 
 ## 2. Context (gathered, with paths or links)

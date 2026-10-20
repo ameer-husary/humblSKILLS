@@ -37,7 +37,11 @@ A (user): "README and the launch tweet, muted."   -> recorded under 1. Brief
 
 ### The five parts of PLAN.md
 1. **Brief (asked):** message (the ONE thing), audience, where and how it plays (muted? autoplay?
-   loop?), length and aspect, sound mode (sfx / music / none), must show / must not show. Ask only what
+   loop?), length and aspect, sound mode (sfx / voice / music / none), must show / must not show.
+   For a voice film, ask whether they will install Chatterbox for an expressive voice (recommended)
+   or accept the flat macOS fallback. Ask for the **iteration budget**: 5 renders cleared a 2-scene
+   film, but a 6-scene film needed 6+ (three critic rounds reached 5/6 scenes at render 5); suggest
+   `max_iterations` 8 for 5+ scenes and record the answer in scenes.json. Ask only what
    the request did not answer; never fill a field by inference without saying so.
 2. **Context (gathered):** the facts the video states, each with its source; brand files (logo, colors,
    fonts) placed in `assets/` and listed in `SOURCES.md`; who supplies real captures. Read the product,

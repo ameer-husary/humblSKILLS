@@ -132,3 +132,7 @@ Entry shape:
     s05-fix, s03->s04 and s04->s05 at 7/10. Escalated to the user as the skill prescribes.
 
 [LINT 2026-10-20] 23 wiki, 18 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.

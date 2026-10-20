@@ -13,16 +13,11 @@
         <div id="mark"></div>
       </div>
       <script>
-        function spring(t, zeta, omega) {
-          if (t <= 0) return 0;
-          var wd = omega * Math.sqrt(1 - zeta * zeta);
-          return 1 - Math.exp(-zeta * omega * t) * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
-        }
-        function springEase(dur, zeta, omega) { return function (p) { return p >= 1 ? 1 : spring(p * dur, zeta, omega); }; }
+        var M = window.motion;  // assets/vendor/motion.js
 
         var hit = JSON.parse(document.querySelector('#root').dataset.cues)[0];
         var tl = gsap.timeline({ paused: true });
-        tl.to('#mark', { scale: 1, duration: 0.9, ease: springEase(0.9, 0.45, 16) }, hit.t);
+        tl.to('#mark', { scale: 1, duration: 0.9, ease: M.springEase(0.9, 0.45, 16) }, hit.t);
         // Planned hold: the lockup rests from ~1.1 s (declared in scenes.json "holds").
         window.__timelines["s02-lockup"] = tl;
       </script>

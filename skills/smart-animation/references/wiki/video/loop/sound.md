@@ -26,10 +26,20 @@ listening tools that time every sound against its cue on the rendered video.
 - `voice`: narration-led. Lines are cues `{"t": 0.4, "kind": "vo", "text": "..."}` in each scene's
   `data-cues`; effects and an optional ducked bed sit under them. The voice times the film
   (`cut_on: "free"`): a measured narrated launch film put only 10% of its cuts on the beat.
-  - `"voice": {"engine": "say", "name": "Reed (English (US))", "rate": 178}` renders each line with
-    macOS `say` (offline). `"engine": "hyperframes"` uses `npx hyperframes tts` (local Kokoro; it
-    needs `kokoro-onnx` in `HYPERFRAMES_PYTHON`, and on 0.8.181 it failed here on an espeak-ng data
-    path baked into the loader). `"engine": "files"` with `"file"` per cue uses recorded lines.
+  - **Recommend Chatterbox, and ask the user to install it** (it is a ~2 GB model; never install it
+    silently): `uv venv -p 3.11 ~/.venvs/chatterbox && VIRTUAL_ENV=~/.venvs/chatterbox uv pip install
+    chatterbox-tts "setuptools<81"`, then `"voice": {"engine": "chatterbox", "python":
+    "~/.venvs/chatterbox/bin/python", "exaggeration": 0.6, "cfg_weight": 0.45, "seed": 7}` (optional
+    `"ref": "assets/voice-ref.wav"` to clone a licensed voice). Expressive and measurably more human
+    than `say` (earshot: "real or pro-produced", z +3.3 against +2.2). All missing lines render in one
+    process (44 s for six lines on Apple Silicon); `setuptools<81` avoids a silent watermarker import
+    failure. Fixed seed, so the same text gives the same take.
+  - `"engine": "say"` (macOS, offline, always present) is the fallback when the user declines: flat
+    and dated, fine for timing drafts. `"engine": "hyperframes"` uses `npx hyperframes tts` (local
+    Kokoro; failed here on 0.8.181 on an espeak-ng data path baked into its loader).
+    `"engine": "files"` with `"file"` per cue uses recorded lines.
+  - Engines pace differently: the same lines ran 20-25% faster on Chatterbox than on `say`. Measure
+    with the engine you will ship, then time the scenes.
   - Lines are cached by text in `audio/vo/`, leading silence trimmed so a line starts on its cue;
     `.loop/voice.json` records each line's start and end. Measure line lengths before timing scenes
     (`say -o` and ffprobe, or one loop pass): a scene is its line plus 0.5-1 s of breath.

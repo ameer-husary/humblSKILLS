@@ -11,8 +11,11 @@ build is pure DSP (no models). listen loads earshot's models once (~1.1 GB downl
 cues.json: {"fps": 30, "events": [{"t": 0.3, "kind": "key", "scene": "s01-hook", "pitch": "C5"?, "gain_db": 0?}]}
 A cue's kind is a kit role (see `earshot kit init`); a role set to null in audio/kit.json is skipped.
 Kind "vo" is a narration line: {"t": 0.4, "kind": "vo", "text": "..."} (or "file": "assets/vo/x.wav").
-scenes.json "voice": {"engine": "say" | "hyperframes" | "files", "name": "Samantha", "rate": 180} renders
-each line once (cached by text) to audio/vo/; leading silence is trimmed so the line starts on its cue.
+scenes.json "voice": {"engine": "chatterbox" | "say" | "hyperframes" | "files", ...} renders each line once
+(cached by text) to audio/vo/; leading silence is trimmed so the line starts on its cue.
+  chatterbox (recommended, expressive): {"engine": "chatterbox", "python": "<venv python with chatterbox-tts>",
+    "exaggeration": 0.5, "cfg_weight": 0.5, "ref": "assets/voice-ref.wav"?}; all missing lines in one process.
+  say (macOS fallback, flat): {"engine": "say", "name": "Reed (English (US))", "rate": 178}.
 scenes.json "bed": {"file": "assets/bed.wav", "db": -6, "duck_db": -5} mixes a music bed under
 everything, ducked while a line plays, faded out over the last 1.5 s. Line timings -> .loop/voice.json.
 """
@@ -25,6 +28,53 @@ import sys
 TARGET_LUFS, CEILING_DBTP = -14.0, -1.0
 
 
+CHATTERBOX = r"""
+import json, sys, torch, torchaudio as ta
+from chatterbox.tts import ChatterboxTTS
+jobs = json.load(open(sys.argv[1]))
+dev = 'mps' if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu')
+model = ChatterboxTTS.from_pretrained(device=dev)
+torch.manual_seed(0)  # same text, same settings -> same take
+for j in jobs:
+    torch.manual_seed(j['seed'])
+    wav = model.generate(j['text'], exaggeration=j['exaggeration'], cfg_weight=j['cfg_weight'],
+                         **({'audio_prompt_path': j['ref']} if j.get('ref') else {}))
+    ta.save(j['out'], wav, model.sr)
+"""
+
+
+def line_path(project, voice, text):
+    key = hashlib.sha1(json.dumps([voice, text], sort_keys=True).encode()).hexdigest()[:12]
+    return os.path.join(project, 'audio', 'vo', key + '.wav')
+
+
+def chatterbox_batch(project, events, voice, sr):
+    """render every missing chatterbox line in one process (the model loads once, ~2 GB on first use)."""
+    py = voice.get('python') or os.environ.get('CHATTERBOX_PYTHON')
+    if not py:
+        raise SystemExit('video-sound: voice engine "chatterbox" needs "python" in scenes.json voice (or '
+                         'CHATTERBOX_PYTHON): a venv with `pip install chatterbox-tts` (Python 3.11).')
+    jobs = []
+    for ev in events:
+        if ev['kind'] != 'vo' or ev.get('file'):
+            continue
+        out = line_path(project, voice, ev['text'])
+        if not os.path.exists(out):
+            jobs.append({'text': ev['text'], 'out': out[:-4] + '.cb.wav', 'final': out,
+                         'exaggeration': voice.get('exaggeration', 0.5), 'cfg_weight': voice.get('cfg_weight', 0.5),
+                         'seed': voice.get('seed', 7), 'ref': voice.get('ref') and os.path.join(project, voice['ref'])})
+    if not jobs:
+        return
+    os.makedirs(os.path.join(project, 'audio', 'vo'), exist_ok=True)
+    spec = os.path.join(project, '.loop', 'chatterbox-jobs.json')
+    os.makedirs(os.path.dirname(spec), exist_ok=True)
+    json.dump(jobs, open(spec, 'w'))
+    subprocess.run([py, '-c', CHATTERBOX, spec], check=True)
+    for j in jobs:
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', j['out'], '-ac', '1', '-ar', str(sr), j['final']], check=True)
+        os.remove(j['out'])
+
+
 def render_line(project, ev, voice, sr):
     """one narration line -> float32 mono at sr, leading silence trimmed (cached under audio/vo/)."""
     import numpy as np
@@ -33,8 +83,9 @@ def render_line(project, ev, voice, sr):
     if engine == 'files' or ev.get('file'):
         src = os.path.join(project, ev['file'])
     else:
-        key = hashlib.sha1(json.dumps([engine, voice, ev['text']], sort_keys=True).encode()).hexdigest()[:12]
-        src = os.path.join(project, 'audio', 'vo', key + '.wav')
+        src = line_path(project, voice, ev['text'])
+        if not os.path.exists(src) and engine == 'chatterbox':
+            raise SystemExit(f'video-sound: chatterbox did not produce {src}')
         if not os.path.exists(src):
             os.makedirs(os.path.dirname(src), exist_ok=True)
             if engine == 'say':  # macOS, offline; the fallback when local TTS is unavailable
@@ -73,6 +124,8 @@ def build(project, cues_path, duration):
     events = json.load(open(cues_path))['events']
 
     cfg = json.load(open(os.path.join(project, 'scenes.json')))
+    if cfg.get('voice', {}).get('engine') == 'chatterbox':
+        chatterbox_batch(project, events, cfg['voice'], sr)
     mix = np.zeros((int(round(duration * sr)), 2), np.float32)
     used, skipped, lines = {}, [], []
     for ev in events:
