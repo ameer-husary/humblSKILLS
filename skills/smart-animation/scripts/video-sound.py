@@ -13,7 +13,7 @@ A cue's kind is a kit role (see `earshot kit init`); a role set to null in audio
 Kind "vo" is a narration line: {"t": 0.4, "kind": "vo", "text": "..."} (or "file": "assets/vo/x.wav").
 scenes.json "voice": {"engine": "say" | "hyperframes" | "files", "name": "Samantha", "rate": 180} renders
 each line once (cached by text) to audio/vo/; leading silence is trimmed so the line starts on its cue.
-scenes.json "bed": {"file": "assets/bed.wav", "db": -16, "duck_db": -9} mixes a music bed under
+scenes.json "bed": {"file": "assets/bed.wav", "db": -6, "duck_db": -5} mixes a music bed under
 everything, ducked while a line plays, faded out over the last 1.5 s. Line timings -> .loop/voice.json.
 """
 import hashlib
@@ -115,7 +115,7 @@ def build(project, cues_path, duration):
             env[int(ln['t'] * sr):int(ln['end'] * sr)] = 1.0
         k = int(0.15 * sr)
         env = np.convolve(env, np.ones(k) / k, mode='same')
-        gain = 10 ** ((bed.get('db', -16) + bed.get('duck_db', -9) * env) / 20)
+        gain = 10 ** ((bed.get('db', -6) + bed.get('duck_db', -5) * env) / 20)  # measured: ~10-12 LU under the voice
         fade = np.clip((len(mix) - np.arange(len(mix))) / (1.5 * sr), 0, 1)
         mix += y * (gain * fade)[:, None]
     os.makedirs(os.path.join(project, '.loop'), exist_ok=True)
