@@ -6,10 +6,15 @@ Called by video-loop.sh; stdlib only. All paths are relative to the project dire
     video-gate.py cues   <project>          # data-cues of every scene + timeline -> cues.json; prints duration
     video-gate.py stale  <project>          # what needs fresh frames: "scene <id> <start> <end>" / "pair <a> <b> <start> <end>"
     video-gate.py report <project> <mp4>    # write stubs, apply the gate, print a summary, exit with the gate's code
+    video-gate.py final  <project> <mp4>    # mechanical rules on the delivery render (dead frames, sound)
+    video-gate.py plan   <project>          # PLAN.md exists, is filled in, covers every scene and is approved
+    video-gate.py scenes <project>          # "<id> <start> <end>" per scene, for per-scene evidence
 
-Gate exit codes: 0 pass, 2 waiting for scores, 3 failing, 4 iteration cap reached while failing.
-Scores live in critique/<scene>.md and critique/pairs/<a>__<b>.md (`score: N` in the frontmatter).
-A score counts only while the stub's source_sha matches the current sources; any edit clears it.
+Gate exit codes: 0 pass, 1 plan not ready, 2 waiting for scores, 3 failing, 4 iteration cap reached while failing.
+Scores live in critique/<scene>.md and critique/pairs/<a>__<b>.md (`score: N` in the frontmatter); a score
+counts only when all five rubric lines carry a 0-2 number and a reason, and they sum to it.
+A score counts only while the stub's source_sha matches the current sources; any edit clears it, including
+an edit to a shared file (index.html plus scenes.json "shared" globs: fonts, shared CSS, the host).
 """
 import glob
 import hashlib
@@ -35,6 +40,7 @@ PAIR_RUBRIC = ['The cut reads as one motion, not two', 'Direction and velocity c
                'Sound bridges or punctuates the cut (no double hit, no gap)', 'Color and layout continuity',
                'The second scene answers the first (story)']
 PAD = 0.5  # seconds either side of a cut in a pair's evidence
+RUBRIC_LINE = re.compile(r'^- (.+?):[ \t]*([0-2])[ \t]*[-:\u2013\u2014][ \t]*(\S.{9,})$', re.M)  # "- label: 2 - reason"
 
 
 def load(project, name, default=None):
@@ -108,9 +114,20 @@ def assets_in(text):
     return sorted({a or b for a, b in re.findall(ASSET_RX, text)})
 
 
-def sha(project, sid, src, entry):
-    """Everything a scene's look depends on: its file, its scenes.json entry, the assets it names, the kit."""
+def shared_sha(project, cfg):
+    """the host and every declared shared file (fonts, shared CSS): an edit here clears every score."""
     h = hashlib.sha1()
+    for pat in ['index.html'] + cfg.get('shared', []):
+        for p in sorted(glob.glob(os.path.join(project, pat), recursive=True)):
+            if os.path.isfile(p):
+                h.update(os.path.relpath(p, project).encode() + open(p, 'rb').read())
+    return h.hexdigest()
+
+
+def sha(project, sid, src, entry, shared=''):
+    """Everything a scene's look depends on: its file, its scenes.json entry, the assets it names, the kit,
+    and the shared files."""
+    h = hashlib.sha1(shared.encode())
     text = open(os.path.join(project, src), 'rb').read()
     h.update(text)
     h.update(json.dumps(entry, sort_keys=True).encode())
@@ -133,10 +150,10 @@ def front(path):
 
 def units(project, cfg, times):
     """scenes then adjacent pairs: (kind, key, sha, stub path, start, end)."""
-    out = []
+    out, shared = [], shared_sha(project, cfg)
     for s in cfg['scenes']:
         t0, t1, src = times[s['id']]
-        out.append(('scene', s['id'], sha(project, s['id'], src, s),
+        out.append(('scene', s['id'], sha(project, s['id'], src, s, shared),
                     os.path.join(project, 'critique', s['id'] + '.md'), t0, t1))
     for a, b in zip(out[:], out[1:]):
         key = f'{a[1]}__{b[1]}'
@@ -167,14 +184,30 @@ def subtract(a, b, holds):
     return parts
 
 
-def dead_findings(project, cfg, times, freeze_s):
-    p = os.path.join(project, '.loop', 'dead.tsv')
+def holds_abs(s, t0, t1):
+    return [(t0 + float(h['from']), t1 if h.get('to', 'end') == 'end' else t0 + float(h['to']))
+            for h in s.get('holds', [])]
+
+
+def hold_findings(cfg, times):
+    """a hold is a planned rest, not a way through the freeze rule: cap its share of the scene."""
+    cap, found = cfg.get('max_hold_share', 0.4), {}
+    for s in cfg['scenes']:
+        t0, t1, _ = times[s['id']]
+        held = sum(max(0.0, min(b, t1) - max(a, t0)) for a, b in holds_abs(s, t0, t1))
+        if t1 > t0 and held / (t1 - t0) > cap:
+            found[s['id']] = [f'holds cover {held / (t1 - t0):.0%} of the scene (max {cap:.0%}): '
+                              'shorten the rest or add motion; never add a hold to pass']
+    return found
+
+
+def dead_findings(project, cfg, times, freeze_s, tsv='.loop/dead.tsv'):
+    p = os.path.join(project, tsv)
     rows = [ln.split('\t') for ln in open(p).read().splitlines() if ln.strip()] if os.path.exists(p) else []
     found = {}
     for s in cfg['scenes']:
         t0, t1, _ = times[s['id']]
-        holds = [(t0 + float(h['from']), t1 if h.get('to', 'end') == 'end' else t0 + float(h['to']))
-                 for h in s.get('holds', [])]
+        holds = holds_abs(s, t0, t1)
         for kind, a, b in rows:
             a, b = max(float(a), t0), min(float(b), t1)
             if b <= a:
@@ -196,9 +229,9 @@ def beat_times(project):
                   for b in seq)
 
 
-def sound_findings(project, cfg, fps):
+def sound_findings(project, cfg, fps, listen='critique/audio/listen.json'):
     """per-scene sync failures and film-level loudness from earshot (critique/audio/listen.json)."""
-    tl = load(project, 'critique/audio/listen.json')
+    tl = load(project, listen)
     if tl is None:
         return {}, ['no listening report: earshot did not run (set EARSHOT_PYTHON)']
     lock = load(project, 'audio/kit/kit.lock.json', {}).get('roles', {})
@@ -261,6 +294,19 @@ def banned_warnings(project, times):
     return out
 
 
+def rubric_problem(stub, score):
+    """None when the score is backed by five reasoned rubric lines that sum to it."""
+    text = open(stub).read()
+    sec = text.split('## Rubric', 1)[-1].split('\n## ', 1)[0]
+    lines = RUBRIC_LINE.findall(sec)
+    if len(lines) != 5:
+        return f'{len(lines)}/5 rubric lines have a 0-2 number and a reason ("- label: 2 - why, citing a frame")'
+    total = sum(int(n) for _, n, _ in lines)
+    if abs(total - float(score)) > 1e-6:
+        return f'rubric lines sum to {total}, score says {score}'
+    return None
+
+
 def write_stub(stub, kind, key, h, iteration, auto):
     old = front(stub)
     keep = old.get('source_sha') == h  # unchanged sources keep the agent's score and notes
@@ -271,9 +317,11 @@ def write_stub(stub, kind, key, h, iteration, auto):
     lines += [f"score: {old.get('score', '') if keep else ''}", '---']
     if body is None:
         rub = RUBRIC if kind == 'scene' else PAIR_RUBRIC
-        body = '## Rubric (2 points each)\n' + ''.join(f'- {r}:\n' for r in rub) + \
+        sound = '- sound.png next to this file: earshot sheet of this scene\n' if kind == 'scene' else ''
+        body = '## Rubric (2 points each; "- label: <0-2> - <why, citing a frame or a number>")\n' + \
+            ''.join(f'- {r}: <0-2> - <why>\n' for r in rub) + \
             '\n## Evidence\n- frames/ next to this file (open at full size; the contact sheet only locates)\n' + \
-            '\n## Fix notes for next iteration\n'
+            sound + '\n## Fix notes for next iteration\n'
     open(stub, 'w').write('\n'.join(lines) + '\n' + body)
     return front(stub).get('score', '')
 
@@ -285,6 +333,8 @@ def cmd_report(project, mp4):
     iteration, cap = state.get('iteration', 1), cfg.get('max_iterations', 5)
     fps, need = cfg.get('fps', 30), cfg.get('pass_score', 8)
     dead = dead_findings(project, cfg, times, cfg.get('freeze_s', 0.5))
+    for k, v in hold_findings(cfg, times).items():
+        dead.setdefault(k, []).extend(v)
     assets = asset_findings(project, cfg, times)
     audio = cfg.get('audio', 'sfx')
     sync, film = sound_findings(project, cfg, fps) if audio != 'none' else ({}, [])
@@ -303,7 +353,14 @@ def cmd_report(project, mp4):
                 if off > 1:
                     probs.append(f'cut {off:.1f} frames off the beat')
             auto['mechanical'] = '; '.join(probs) or 'clean'
+            auto['holds'] = ', '.join(f"{h['from']}-{h.get('to', 'end')} s ({h.get('reason', 'no reason')})"
+                                      for h in next(s for s in cfg['scenes'] if s['id'] == key).get('holds', [])) or 'none'
         score = write_stub(stub, kind, key, h, iteration, auto)
+        why = rubric_problem(stub, score) if re.fullmatch(r'\d+(\.\d+)?', score) else None
+        if why:
+            print(f'score {key}: not counted, {why}')
+            score = ''
+
         if kind == 'scene' and auto['mechanical'] != 'clean':
             failing.append(f"{key}: {auto['mechanical']}")
         if not re.fullmatch(r'\d+(\.\d+)?', score):
@@ -330,12 +387,56 @@ def cmd_report(project, mp4):
             return 4
         return 3
     print(f'pass: {len(times)} scenes and {len(times) - 1} pairs at >= {need}/10, picture and sound clean '
-          f'({mp4}). Ask the user to preview before the delivery render.')
+          f'({mp4}). Next: video-loop.sh --deliver, look through critique/final/frames, then ask the user to watch.')
     return 0
 
 
+def cmd_final(project, mp4):
+    """the delivery render gets the mechanical rules again; scores carry over from the draft."""
+    cfg = config(project)
+    times, _ = scene_times(project, cfg)
+    probs = [f'{k}: {"; ".join(v)}' for k, v in dead_findings(project, cfg, times, cfg.get('freeze_s', 0.5),
+                                                              '.loop/dead-final.tsv').items()]
+    if cfg.get('audio', 'sfx') != 'none':
+        per, film = sound_findings(project, cfg, cfg.get('fps', 30), 'critique/final/listen.json')
+        probs += [f'{k}: {"; ".join(v)}' for k, v in per.items()] + film
+    for p in probs:
+        print('fail  ' + p)
+    if probs:
+        return 3
+    print(f'final: {mp4} clean. Look through critique/final/frames yourself, then ask the user to watch '
+          f'{mp4} (with sound) and approve before you call it done.')
+    return 0
+
+
+def cmd_plan(project):
+    cfg = config(project)
+    p = os.path.join(project, 'PLAN.md')
+    if not os.path.exists(p):
+        print('plan: no PLAN.md (copy templates/video/PLAN.md and work through it with the user first)')
+        return 1
+    text = open(p).read()
+    probs = []
+    if 'TODO' in text:
+        probs.append(f"{text.count('TODO')} TODO left")
+    probs += [f'scene {s["id"]} is not in the beat sheet' for s in cfg['scenes'] if s['id'] not in text]
+    if not re.search(r'^approved:[ \t]*\S', text, re.M):
+        probs.append('no "approved: <date, who>" line: the user has not approved the plan')
+    for pr in probs:
+        print('plan: ' + pr)
+    return 1 if probs else 0
+
+
+def cmd_scenes(project):
+    cfg = config(project)
+    times, _ = scene_times(project, cfg)
+    for s in cfg['scenes']:
+        print(s['id'], f'{times[s["id"]][0]:.3f}', f'{times[s["id"]][1]:.3f}')
+
+
 if __name__ == '__main__':
-    cmds = {'cues': cmd_cues, 'stale': cmd_stale, 'report': cmd_report}
+    cmds = {'cues': cmd_cues, 'stale': cmd_stale, 'report': cmd_report, 'final': cmd_final, 'plan': cmd_plan,
+            'scenes': cmd_scenes}
     if len(sys.argv) < 3 or sys.argv[1] not in cmds:
         sys.exit(__doc__)
     sys.exit(cmds[sys.argv[1]](*sys.argv[2:]) or 0)

@@ -109,11 +109,12 @@ and `references/wiki/motion/principles/accessibility.md` (reduced-motion floor +
 
 **And route video work (a rendered MP4, not live UI motion):**
 
-- **Make / fix an animation video (render loop, scoring, sound):** Read all four
-  `references/wiki/video/loop/` concepts in order: `render-engine.md` (HyperFrames, one command,
-  approval point), `reference-assets.md` (real assets, closed-form springs, banned defaults),
-  `sound.md` (earshot kits on picture cues, effects-only default, music mode) and `self-critique.md`
-  (rubric, adjacent pairs, mechanical rules, exit codes). Install HyperFrames' own skills
+- **Make / fix an animation video (plan, render loop, scoring, sound):** Read all five
+  `references/wiki/video/loop/` concepts in order: `plan.md` (interview, context, research, beat sheet,
+  approval - before any scene), `render-engine.md` (HyperFrames, one command, delivery and review),
+  `reference-assets.md` (real assets, closed-form springs, banned defaults), `sound.md` (earshot kits
+  on picture cues, effects-only default, music mode) and `self-critique.md` (reasoned rubric, adjacent
+  pairs, critic subagent, mechanical rules, exit codes). Install HyperFrames' own skills
   (`npx hyperframes skills update`) for the composition contract.
 
 **Live enumeration of everything this skill knows:**
@@ -128,10 +129,12 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
   every wiki file's path/frontmatter triple and that each cites a real
   `references/raw/` source. Run after editing any wiki concept.
 - `scripts/video-init.sh <dir>` — `hyperframes init` plus two starter scenes (springs, `data-cues`),
-  `scenes.json`, `assets/SOURCES.md`, `critique/`.
-- `scripts/video-loop.sh [dir]` — one loop pass: timeline -> cues -> sound -> check -> draft render ->
-  dead frames, earshot listening, frames for changed scenes and cuts -> gate. Exit 0 pass, 1 tool
-  error, 2 waiting for scores, 3 failing, 4 iteration cap. Set `EARSHOT_PYTHON`.
+  `scenes.json`, `PLAN.md`, `assets/SOURCES.md`, `critique/`.
+- `scripts/video-loop.sh [--deliver] [dir]` — one loop pass: plan check -> timeline -> cues -> sound ->
+  check -> draft render -> dead frames, earshot listening, frames for changed scenes and cuts -> gate.
+  Exit 0 pass, 1 plan not ready or tool error, 2 waiting for scores, 3 failing, 4 iteration cap.
+  `--deliver` then renders the final, re-checks it, and writes a poster and review frames. Set `EARSHOT_PYTHON`.
+- `scripts/tests/test_video_gate.py` — hermetic gate test (21 checks, no HyperFrames or earshot).
 - `scripts/dead-frames.sh <mp4>` — freeze/black stretches from the encoded pixels (TSV).
 - `scripts/video-sound.py`, `scripts/video-gate.py` — the sound build/listen and the gate, called by
   `video-loop.sh`.
@@ -160,13 +163,15 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
 
 ### Example 3: "Make a 15-second launch video for my CLI, with sound"
 
-1. Read the four `video/loop/*` concepts; `bash scripts/video-init.sh launch`.
-2. Put real assets in `launch/assets/` and list them in `SOURCES.md`; write one scene per beat of
+1. Read the five `video/loop/*` concepts; `bash scripts/video-init.sh launch`.
+2. Work through `launch/PLAN.md` with the user one question at a time; write `approved:` only after
+   they confirm the beat sheet.
+3. Put real assets in `launch/assets/` and list them in `SOURCES.md`; write one scene per beat of
    the story as a sub-composition, its sound events in `data-cues`, motion on `springEase`.
-3. `EARSHOT_PYTHON=... bash scripts/video-loop.sh launch` until it exits 2, open every frame under
-   `critique/`, score scenes and pairs, fix, rerun. Exit 3 means fix notes to apply.
-4. At exit 0, start `npx hyperframes preview --background` and ask the user to approve; then render
-   `--quality delivery`. At exit 4, stop and show the user what still fails.
+4. `EARSHOT_PYTHON=... bash scripts/video-loop.sh launch` until it exits 2; hand each stub to a critic
+   subagent (prompt in `self-critique.md`), apply the fix notes, rerun. Exit 3 means fixes to apply.
+5. At exit 0, run `video-loop.sh --deliver launch`, look through `critique/final/frames`, then ask the
+   user to watch `renders/final.mp4` with sound. At exit 4, stop and show the user what still fails.
 
 ## Troubleshooting
 
@@ -174,7 +179,10 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
 point `EARSHOT_PYTHON` at its python, or set `"audio": "none"` in `scenes.json`.
 
 **A scene fails "freeze ... (unplanned)" on an intentional rest:** declare it in that scene's
-`holds` in `scenes.json` (scene-local seconds, `"to": "end"` allowed). Do not raise the threshold.
+`holds` in `scenes.json` (scene-local seconds, `"to": "end"` allowed, at most 40% of the scene).
+Do not raise the threshold.
+
+**"score ...: not counted":** every rubric line needs `<0-2> - <reason>` and the lines must sum to the score.
 
 **Render shows static frames after a long wait:** a host `data-composition-id` does not match the
 sub-composition's inner id and timeline key. They must be identical.

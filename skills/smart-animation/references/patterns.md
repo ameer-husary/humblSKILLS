@@ -31,3 +31,11 @@ Entry shape:
 - Didn't: the starter's first timing held an empty canvas 0.5 s after the word left; the gate
   caught it as an unplanned freeze (fixed by shortening the scene to 1.7 s).
 - Lesson: judge peak-aligned sounds with a 100 ms window; keep freezedetect at n=0.0003; declare holds.
+
+### 2026-10-20 | Delivery pass and per-scene sound on the starter (3.5 s)
+- Context: `video-loop.sh --deliver` after a passing draft gate, HyperFrames 0.8.181, earshot 0.3.0.
+- Approach: delivery render + dead frames + earshot listen on the final, poster, 2 fps frames.
+- Result: whole --deliver run 26 s. Per-scene earshot sheet exposed an uncued key-release click at
+  0.90 s that the film-wide sheet hid. A fixed 6x6 contact sheet padded a 3.5 s video with black
+  tiles that read as black frames; grid sized to the frame count with gray padding instead.
+- Lesson: judge sound per scene; never pad evidence images with black.

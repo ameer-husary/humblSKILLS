@@ -3,7 +3,7 @@ title: "Render Engine: HyperFrames Drafts, One Command, Human Approval"
 context: video
 category: loop
 concept: render-engine
-description: "Stage 1 of the video loop: HyperFrames seeks HTML frame by frame and encodes MP4; video-loop.sh drives timeline, check, draft render and evidence in one command, and only the user's approval unlocks the delivery render."
+description: "Stage 1 of the video loop: HyperFrames seeks HTML frame by frame and encodes MP4; video-loop.sh drives timeline, check, draft render and evidence in one command; --deliver renders the final, re-checks the encoded file, writes a poster and frames for the agent to review, then the user watches and approves."
 tags: video, hyperframes, render, mp4, headless-chrome, gsap, determinism, loop
 sources:
   - "references/raw/hyperframes.md"
@@ -42,10 +42,19 @@ await page.goto(url); for (let f = 0; f < 300; f++) { await page.screenshot({ pa
   `scenes.json` never stores seconds; scene-local cue offsets live on the scene root (`data-cues`).
 - **Drafts are working renders.** Every iteration renders `--quality draft` (about 8.5 s for 5 s of
   1080p on an M-series Mac). The render is skipped when no input changed.
-- **Approval point:** after `video-loop.sh` exits 0, open `npx hyperframes preview --background`,
-  hand the user the URL, and only after they approve run
-  `npx hyperframes render --quality delivery --fps <fps> --output renders/final.mp4`, then
-  `bash scripts/dead-frames.sh renders/final.mp4` once more.
+- **Preview frames are the critique evidence.** Stubs use `hyperframes snapshot` of the live
+  composition: fast, per scene, re-taken only for changed units. The encoded video is reviewed once,
+  at the end.
+- **Delivery and approval:** after `video-loop.sh` exits 0, run `video-loop.sh --deliver`. It renders
+  `--quality delivery` to `renders/final.mp4`, checks its duration, reruns dead frames and earshot
+  listening on the encoded file (`video-gate.py final`), writes `renders/poster.png` (the last settled
+  frame, or `scenes.json` `poster_at`) and `critique/final/frames/` (2 per second) plus a contact sheet.
+  Then **look through those frames yourself** (they are the real output: fonts, encoding, canvas), and
+  **ask the user to watch `final.mp4` with sound and approve** before calling it done. Their notes go
+  back into PLAN.md and the scenes; the loop starts again.
+- **Shipping in an app or page:** use the poster as the `prefers-reduced-motion` fallback, start
+  muted, never autoplay with sound, and give a replay control. These follow the skill's accessibility
+  floor (`motion/principles/accessibility.md`).
 - Projects pin `hyperframes@<version>` in `package.json`; the loop uses that pin.
 
 ## Sources
@@ -56,6 +65,7 @@ await page.goto(url); for (let f = 0; f < 300; f++) { await page.screenshot({ pa
 ## Command
 
 ```bash
-bash scripts/video-init.sh my-video          # scaffold (hyperframes init + starter scenes)
-EARSHOT_PYTHON=/path/to/venv/bin/python bash scripts/video-loop.sh my-video
+bash scripts/video-init.sh my-video          # scaffold (hyperframes init + starter scenes + PLAN.md)
+EARSHOT_PYTHON=/path/to/venv/bin/python bash scripts/video-loop.sh my-video            # until exit 0
+EARSHOT_PYTHON=/path/to/venv/bin/python bash scripts/video-loop.sh --deliver my-video  # final + review
 ```

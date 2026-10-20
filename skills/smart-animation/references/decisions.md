@@ -207,3 +207,17 @@ Entry shape:
 - Why: sub-compositions cannot fetch files (determinism) and their `<head>` is discarded, so (A)
   and (B) cannot feed the timeline; an attribute is readable by both the timeline and the gate.
 - Result: keys and the hit measured 0-2 ms from their cues on the rendered MP4.
+
+### 2026-10-20 | Hardening the loop after review (plan gate, reasoned scores, delivery check)
+- Context: a gap review found ways a bad video could pass: bare scores, shared edits keeping old
+  scores, holds hiding freezes, an unchecked delivery render, and no planning before the first scene.
+- Options: per gap, (A) document the rule only, (B) enforce it in video-gate.py.
+- Chose: (B) for each, at the smallest size: rubric lines must carry 0-2 + a reason and sum to the
+  score; index.html plus scenes.json "shared" globs enter every fingerprint; holds capped at 40% of a
+  scene; `--deliver` re-runs dead frames and listening on the encoded final and writes poster +
+  review frames; PLAN.md must be filled, cover every scene and carry an `approved:` line.
+- Why: each gap was an honest-agent failure mode, not only a cheating one (a forgotten font edit, a
+  long lockup). Critique evidence stays on preview snapshots (fast, per unit); the encoded video is
+  reviewed once at the end by the agent and then the user, as the user chose.
+- Result: hermetic test, 21 checks; real run: plan gate exit 1, hold cap caught the starter's 56%
+  lockup, honest 7/10 scores exit 3, deliver exit 0 with poster and frames.

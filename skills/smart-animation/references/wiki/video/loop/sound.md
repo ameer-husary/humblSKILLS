@@ -60,7 +60,10 @@ and the hit lands 80 ms after the picture.
 
 ### Listen (`video-sound.py listen`, models load once)
 `api.timeline(mp4, video=mp4, cues=cues.json)`, `api.sheet(...)` -> `critique/audio/sheet.png`,
-`api.critique(mp4)` -> `critique/audio/critique.json`. Measured: keys and the hit landed 0-2 ms from
+`api.critique(mp4)` -> `critique/audio/critique.json`, and one `api.sheet(..., start, end)` per scene
+-> `critique/<scene>/sound.png`, so each scene's sound line is judged on its own window. The per-scene
+sheet of the starter showed an uncued "laptop key click" at 0.90 s (a take's release), which the
+film-wide sheet hid among the other keys: uncued events are for the critic, not the gate. Measured: keys and the hit landed 0-2 ms from
 their cues. A whoosh placed by its apex read -37 ms `near`, because earshot times an event at its
 onset: peak/end-aligned roles pass within 100 ms, onset roles need 1 frame.
 
@@ -68,6 +71,11 @@ onset: peak/end-aligned roles pass within 100 ms, onset roles need 1 frame.
 - A take whose earshot audit still flags it after re-rolls (`checks` in `kit.lock.json`) fails the film:
   pick another bank sound for that role.
 - Stacked lockup: no other cue within 3 frames of a `hit` (one clean element carries the lockup).
+
+### Version drift
+`video-sound.py` calls earshot internals (`earshot.features.true_peak_dbtp`, `earshot.forge.fx.limit`).
+`video-loop.sh` warns when `earshot.__version__` differs from the tested 0.3.0 (commit `925ebe5`):
+re-run `scripts/tests/test_video_gate.py` and one real loop before trusting sound results.
 
 ### What never gates
 Silence (it is not a dead frame), earshot's `critique` verdict and its `realness` score. earshot's own

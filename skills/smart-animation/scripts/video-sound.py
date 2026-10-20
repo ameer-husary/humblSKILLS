@@ -4,7 +4,8 @@
 Run with a Python that can `import earshot` (set EARSHOT_PYTHON for video-loop.sh).
 
     video-sound.py build  <project> <cues.json> <duration_s>   # kit takes on cues -> audio/soundtrack.wav
-    video-sound.py listen <project> <cues.json> <video.mp4>    # earshot timeline + sheet + critique -> critique/audio/
+    video-sound.py listen <project> <cues.json> <video.mp4> [out=critique/audio] [scenes]
+        # earshot timeline + sheet + critique -> <out>/; scenes = "id:t0:t1,..." adds critique/<id>/sound.png
 
 build is pure DSP (no models). listen loads earshot's models once (~1.1 GB download on first use).
 cues.json: {"fps": 30, "events": [{"t": 0.3, "kind": "key", "scene": "s01-hook", "pitch": "C5"?, "gain_db": 0?}]}
@@ -76,12 +77,17 @@ def build(project, cues_path, duration):
     print(json.dumps(report))
 
 
-def listen(project, cues_path, video):
+def listen(project, cues_path, video, out='critique/audio', scenes=''):
     from earshot import api
-    out = os.path.join(project, 'critique', 'audio')
+    out = os.path.join(project, out)
     os.makedirs(out, exist_ok=True)
     tl = api.timeline(video, video=video, cues=cues_path)
     api.sheet(video, os.path.join(out, 'sheet.png'), video=video, cues=cues_path, tl=tl)
+    for spec in filter(None, scenes.split(',')):  # one sheet per scene, so each sound line is judged on its own
+        sid, t0, t1 = spec.rsplit(':', 2)
+        os.makedirs(os.path.join(project, 'critique', sid), exist_ok=True)
+        api.sheet(video, os.path.join(project, 'critique', sid, 'sound.png'), video=video, cues=cues_path,
+                  start=float(t0), end=float(t1))
     crit = api.critique(video, video=video)
     json.dump(tl, open(os.path.join(out, 'listen.json'), 'w'), indent=1, default=str)
     json.dump(crit, open(os.path.join(out, 'critique.json'), 'w'), indent=1, default=str)
@@ -92,9 +98,9 @@ def listen(project, cues_path, video):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 5 or sys.argv[1] not in ('build', 'listen'):
+    if len(sys.argv) < 5 or sys.argv[1] not in ('build', 'listen'):
         sys.exit(__doc__)
     if sys.argv[1] == 'build':
         build(sys.argv[2], sys.argv[3], float(sys.argv[4]))
     else:
-        listen(sys.argv[2], sys.argv[3], sys.argv[4])
+        listen(*sys.argv[2:7])

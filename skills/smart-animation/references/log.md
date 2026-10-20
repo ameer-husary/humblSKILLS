@@ -107,3 +107,16 @@ Entry shape:
 [LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
 
 [LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 22 wiki, 17 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[UPDATE 2026-10-20] Loop hardening after the gap review (same PR, still 0.6.0).
+  - New: wiki/video/loop/plan.md, raw/hyperframes-planning.md, templates/video/PLAN.md,
+    scripts/tests/test_video_gate.py (21 hermetic checks).
+  - video-gate.py: reasoned rubric (0-2 + reason per line, sum = score), shared fingerprint
+    (index.html + scenes.json "shared"), hold cap (max_hold_share 0.4), `final`, `plan`, `scenes`.
+  - video-loop.sh: plan gate, earshot version warning, per-scene sound.png, `--deliver`.
+  - Starter lockup shortened to 1.8 s (its hold covered 56%). Self-critique gains a critic-subagent prompt.
+  - Real run verified: plan exit 1 -> honest 7/10 exit 3 -> pass -> deliver exit 0.
+
+[LINT 2026-10-20] 22 wiki, 17 raw. Hard: 0, Soft: 12. Regenerated _index.md.

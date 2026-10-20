@@ -3,6 +3,7 @@
   "pass_score": 8,
   "max_iterations": 5,
   "audio": "sfx",
+  "shared": [],
   "scenes": [
     {
       "id": "s01-hook",
