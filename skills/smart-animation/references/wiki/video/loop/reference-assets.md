@@ -93,6 +93,12 @@ empty ground for 0.4-0.7 s before the next scene drew itself (pair scores 4-7). 
   A 1 -> 1.02, B 1.02 -> 1, so each scene starts at the scale the last one ended on, and push at
   constant velocity (`motion.drift`): an eased push stops at both ends, which read as a frozen
   dashboard across a cut.
+- **Grow a text card with a clip-path reveal, not a scale.** Scaling a chip up into a card
+  squashed its text to ~8 px mid-morph; `clipPath: inset(0 0 100% 0) -> inset(0)` reveals it whole.
+- **One accent means one.** Accent-filled checkboxes and card dots next to an accent cursor broke the
+  style's one-accent rule; fill checks in ink and keep the accent for the eye's target.
+- **Numbers agree across scenes.** A grid header of 41K over cards summing to 24.4K was flagged;
+  derive every on-screen total from the same data.
 - **The cursor always has a target** (the word just resolved, the row being checked, the bar that
   moved) and never parks on top of text: critics marked idle or colliding cursors in 4 of 6 scenes.
 

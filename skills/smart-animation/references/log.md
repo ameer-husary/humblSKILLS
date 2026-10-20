@@ -136,3 +136,9 @@ Entry shape:
 [LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
 
 [LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
+
+[TEST 2026-10-20] Same film, cap 8, Chatterbox voice, motion.js. Units passing: 2 -> 4 -> 8 -> 8 -> 8 -> 9
+  of 11. Exit 4 at 8/8 (s05-fix 7, s05->s06 7). Added: Chatterbox engine, templates/video/motion.js,
+  plan questions for voice engine and iteration budget, cut/sound/critic lessons in the wiki.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.

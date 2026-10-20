@@ -109,6 +109,16 @@ lowest lines, most valuable first. Change nothing else in the file. Reply with t
 
 Units are independent, so critics can run in parallel; the author then applies the fix notes.
 
+**The plan is the tie-breaker, not the latest critic.** Fresh critics each round are independent,
+and they sometimes disagree: one asked for the proof before the claim in the fix scene, a later one
+asked for the claim first. The PLAN row said "card slides in, the bar refills", and chasing the
+first note against it made the scene oscillate (7 -> 8 -> 7). When a fix note contradicts PLAN.md,
+either keep the plan or change the row with the user, then score against the row. Write the beat
+order into the row ("A, then B") so critics cannot read it two ways.
+
+**Sound the critic cannot place becomes a "bug".** Planned ticks at scene starts, too quiet over
+the bed, were reported as an unexplained click at three cuts. Cues that matter get `gain_db`.
+
 ## Sources
 
 - `references/raw/video-loop-brief.md` - >= 8/10 per scene, dead-frame hunt, groups of two = adjacent pairs

@@ -58,6 +58,8 @@ Style: same as the reference - their accent color, their headline copy, their ca
 - Picture: a few long "sets" that rebuild in place; flat wireframe UI built in code that assembles
   piece by piece (checklist rows tick in, numbers count up in mono, bars grow, cards stack); two-tone
   headlines resolving word by word; a small accent cursor that carries the eye across every cut.
+- The key beat gets headline type, not a chip: "it notices first" as a 22 px chip arriving a second
+  after the voice failed; a 48 px two-tone headline resolving on the word "notices" passed.
 - Show before you say: the evidence (the bar refills, the number counts back) lands before the
   claim ("back on track"); a claim on screen before its proof cost the fix scene its pass.
 - Sound: narration on top; a continuous bed ducked under it; one UI tick per arrival; a clean hit on

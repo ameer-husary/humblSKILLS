@@ -107,6 +107,11 @@ onset: peak/end-aligned roles pass within 100 ms, onset roles need 1 frame.
 `video-loop.sh` warns when `earshot.__version__` differs from the tested 0.3.0 (commit `925ebe5`):
 re-run `scripts/tests/test_video_gate.py` and one real loop before trusting sound results.
 
+### UI cues must read over the bed
+With a bed under the voice, default-level ticks and clicks scored 0% "on a strong accent" in earshot,
+and critics marked the sound line down in three scenes. Give the cues that carry a beat (the drop,
+the notice, the fix click) `"gain_db": 4` to `5` in their `data-cues` entry.
+
 ### What never gates
 Silence (it is not a dead frame), earshot's `critique` verdict and its `realness` score. earshot's own
 docs warn both can be pleased without the sound improving; quote them in the rubric instead.

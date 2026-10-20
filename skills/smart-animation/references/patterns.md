@@ -60,3 +60,14 @@ Entry shape:
 - Didn't: fading to empty ground (4/5 cuts in round 1); a per-scene push restarting at every cut.
 - Lesson: a 5+ scene film needs more than 5 renders to clear every unit; ask the user to raise
   max_iterations up front for long films instead of discovering the cap at the end.
+
+### 2026-10-20 | Narrated test film to the raised cap (8 renders, Chatterbox voice)
+- Context: the same 28 s film, cap raised 5 -> 8 with the user's approval; voice switched to Chatterbox.
+- Result: rounds 4-6 took scenes to 5/6 (9, 9, 9, 8, 7, 10) and cuts to 4/5 (9, 8, 9, 10, 7). Exit 4 at
+  8/8 with the fix scene and its outgoing cut at 7. Mix -14.7 LUFS / -1.8 dBTP, 103 BPM bed with a
+  clear pulse, "voice-over narration" detected. Units passing per round: 2, 4, 8, 8, 8, 9 of 11.
+- Worked: carrying one element across each cut (s04 -> s05 reached 10/10: the dashboard never leaves,
+  the cursor rides the refilling bar, one note on the cut); headline type for the key beat; motion.js.
+- Didn't: following a critic note that contradicted the plan's beat order; quiet planned ticks.
+- Lesson: about 8 renders get a six-scene narrated film to ~9 of 11 units; the last units need the
+  plan row to fix the beat order before the critics see it.
