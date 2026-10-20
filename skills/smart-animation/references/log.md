@@ -87,3 +87,23 @@ Entry shape:
     list updated so the skill can actually be selected for gooey work.
 
 [LINT 2026-08-12] 17 wiki, 11 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[INGEST 2026-10-20] Added the code-built video loop; version 0.5.0 -> 0.6.0.
+  - raw: video-loop-brief.md (the three-stage loop + decisions taken with the user), hyperframes.md,
+    earshot.md (incl. FFmpeg measurements of the earshot launch film), claude-remotion-skill.md,
+    hyperframes-motion-reel-skill.md.
+  - wiki/video/loop/: render-engine, reference-assets, sound, self-critique (new context `video`).
+  - scripts: video-init.sh, video-loop.sh, dead-frames.sh (bash 3.2), video-gate.py (stdlib),
+    video-sound.py (earshot), templates/video/ (2 spring scenes with data-cues, scenes.json).
+  - Verified end to end in a scratch project: exit 2 (unscored) -> 3 (6/10) -> 0 (pass) ->
+    2 after a scene edit (stale score cleared) -> 4 at the iteration cap; music mode caught a cut
+    5.9 frames off the beat.
+  - Sound rules: stacked lockup verified (a pop 50 ms after the hit failed the scene); the dirty-take
+    rule is untested because every calm-preset take is clean.
+  - 5 decisions recorded; 1 patterns entry with timings and thresholds.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.

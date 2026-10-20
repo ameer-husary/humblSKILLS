@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+                font: 600 96px/1 ui-sans-serif, system-ui, sans-serif; color: #111827; }
+        #word { display: flex; }
+        #word span { display: inline-block; opacity: 0; }
+      </style>
+      <!-- data-cues: scene-local seconds. The timeline below is built FROM these, and
+           video-loop.sh reads the same attribute to place sound, so picture and sound share one source. -->
+      <div id="root" data-composition-id="s01-hook" data-width="1920" data-height="1080"
+           data-cues='[{"t":0.30,"kind":"key"},{"t":0.42,"kind":"key"},{"t":0.54,"kind":"key"},
+                       {"t":0.66,"kind":"key"},{"t":0.78,"kind":"key"},{"t":1.55,"kind":"whoosh.short"}]'>
+        <div id="word" data-layout-allow-overflow><span>H</span><span>e</span><span>l</span><span>l</span><span>o</span></div>
+      </div>
+      <script>
+        // Closed-form damped spring, a pure function of time: seek-safe, identical on every frame.
+        // zeta < 1 overshoots then settles; omega sets speed. Returns 0 -> 1.
+        function spring(t, zeta, omega) {
+          if (t <= 0) return 0;
+          var wd = omega * Math.sqrt(1 - zeta * zeta);
+          return 1 - Math.exp(-zeta * omega * t) * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
+        }
+        // GSAP ease over a tween of length dur seconds: progress p -> spring position.
+        function springEase(dur, zeta, omega) { return function (p) { return p >= 1 ? 1 : spring(p * dur, zeta, omega); }; }
+
+        var root = document.querySelector('#root');
+        var cues = JSON.parse(root.dataset.cues);
+        var keys = cues.filter(function (c) { return c.kind === 'key'; });
+        var out = cues.filter(function (c) { return c.kind === 'whoosh.short'; })[0];
+        var tl = gsap.timeline({ paused: true });
+        document.querySelectorAll('#word span').forEach(function (el, i) {
+          tl.fromTo(el, { opacity: 0, y: 40 },
+            { opacity: 1, y: 0, duration: 0.5, ease: springEase(0.5, 0.55, 22) }, keys[i].t);
+        });
+        tl.to('#word', { x: -1400, duration: 0.6, ease: springEase(0.6, 0.9, 14) }, out.t - 0.25);  // apex of the sweep lands on the whoosh cue
+        window.__timelines["s01-hook"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

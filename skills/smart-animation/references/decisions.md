@@ -158,3 +158,52 @@ Entry shape:
   keyframes) and is the signal to watch.
 - Result: no scope change. Revisit when a second non-motion component library
   is worth documenting.
+
+### 2026-10-20 | Video loop: HyperFrames + earshot, script/agent split
+- Context: extend the skill from live UI motion to code-built videos with a render -> critique loop
+  (brief: `raw/video-loop-brief.md`).
+- Options: (A) Remotion, (B) HyperFrames, (C) a custom Puppeteer + FFmpeg renderer.
+- Chose: (B) HyperFrames for picture, earshot for sound; the skill only orchestrates and gates.
+- Why: Remotion needs a paid company license at 4+ employees; HyperFrames is Apache-2.0, already
+  seeks frames deterministically and exposes `timeline --json`, `check --json`, `snapshot`, `beats`.
+  A custom renderer would duplicate all of it. earshot (MIT) is the only tool found that both makes
+  effects in code with measured sync points and measures sync on a rendered video.
+- Result: the starter project goes scaffold -> pass in 4 loop runs; first run 64 s including the
+  earshot listen pass, reruns with unchanged inputs skip the render.
+
+### 2026-10-20 | Who scores, and what never gates
+- Context: a bash script cannot judge a frame; an agent judging its own source is unreliable.
+- Options: (A) script calls a vision model, (B) agent writes scores into stubs the script reads,
+  (C) fully manual review.
+- Chose: (B). The script writes evidence + stubs and enforces measurable rules; the agent scores
+  from full-size frames; the next run gates.
+- Why: (A) hides the judgement and adds an API key; (B) keeps the loop resumable from files.
+  earshot `critique` and `realness` inform the rubric but never gate: earshot's own docs say both
+  can be pleased without the sound improving.
+- Result: stale scores are cleared by a per-unit source hash, verified (edit -> exit 2).
+
+### 2026-10-20 | "Groups of two" = adjacent scene pairs
+- Context: the brief's "checks scenes in groups of two" had three readings: two critics, two
+  passes in a row, adjacent pairs.
+- Options: (A) two critics, min score, (B) pass streak of two, (C) adjacent pairs judged on the cut.
+- Chose: (C), left to the best-performing option by the user.
+- Why: per-scene scoring never looks at a cut; pairs are the only reading that adds coverage.
+  A critic subagent (A's benefit) is still recommended in `self-critique.md`.
+- Result: TBD on a real multi-scene video.
+
+### 2026-10-20 | Effects-only sound by default; music mode optional
+- Context: the brief said "cuts land on the beat", but short, often-muted intros read better with
+  sparse effects (the earshot launch film has no music and eight deliberate silences).
+- Options: (A) always music + beat grid, (B) effects only, (C) both, effects default.
+- Chose: (C), confirmed by the user.
+- Why: earshot makes effects but no music; beat-locking only means something with a bed.
+- Result: `scenes.json` "audio": sfx | music | none; the beat check runs only in music mode.
+
+### 2026-10-20 | Cues live on the scene root (data-cues), not in scenes.json
+- Context: picture and sound must share one timing source or they drift.
+- Options: (A) cue times in scenes.json, (B) a shared JS module, (C) a `data-cues` JSON attribute
+  on each scene root that the scene's own timeline is built from.
+- Chose: (C).
+- Why: sub-compositions cannot fetch files (determinism) and their `<head>` is discarded, so (A)
+  and (B) cannot feed the timeline; an attribute is readable by both the timeline and the gate.
+- Result: keys and the hit measured 0-2 ms from their cues on the rendered MP4.

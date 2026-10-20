@@ -1,0 +1,76 @@
+---
+title: "Reference and Assets: Real Files, Closed-Form Springs, No Default Motion"
+context: video
+category: loop
+concept: reference-assets
+description: "Stage 2 of the video loop: every asset is real and listed in assets/SOURCES.md, motion uses closed-form damped springs (seek-safe by construction), and legal-but-generic motion (default easing, CSS transitions, stock fade-ups) is flagged."
+tags: video, assets, spring, easing, closed-form, gsap, banned-motion, choreography
+sources:
+  - "references/raw/video-loop-brief.md"
+  - "references/raw/claude-remotion-skill.md"
+  - "references/raw/hyperframes-motion-reel-skill.md"
+  - "references/raw/hyperframes.md"
+last_ingested: 2026-10-20
+command: scripts/video-gate.py
+---
+
+## Reference and Assets: Real Files, Closed-Form Springs, No Default Motion
+
+Generic AI video looks generic for three reasons: placeholder assets, default easing, and everything
+entering at once. Stage 2 removes all three before the first render.
+
+### Real assets only
+Logos, UI captures, fonts and footage live in `assets/`, one line each in `assets/SOURCES.md`
+(`<file> - <origin> - <license or owner>`). The gate fails a scene that references (`src=`, `href=`,
+`url()`) a missing or unlisted asset, or a placeholder host (placehold, picsum, dummyimage...).
+Licensed brand files stay in the video's own repo, never in a public skill.
+
+### Closed-form springs
+A damped spring has an exact solution, so position is a pure function of time and any frame can be
+seeked without simulating the frames before it:
+
+```js
+// zeta < 1 overshoots then settles; omega sets speed. 0 -> 1.
+function spring(t, zeta, omega) {
+  if (t <= 0) return 0;
+  var wd = omega * Math.sqrt(1 - zeta * zeta);
+  return 1 - Math.exp(-zeta * omega * t) * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
+}
+function springEase(dur, zeta, omega) { return function (p) { return p >= 1 ? 1 : spring(p * dur, zeta, omega); }; }
+tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: springEase(0.5, 0.55, 22) }, t);
+```
+
+Presets: snappy (zeta 0.75, omega 22), settle (0.9, 14), playful (0.5, 18). Keep `dur` long enough
+for the spring to settle (about 4 / (zeta * omega) seconds) or the last frame snaps. Paste the helper
+inside each scene's `<template>`: sub-composition heads are discarded.
+
+**Incorrect (legal in HyperFrames, generic on screen):**
+
+```js
+tl.from('.card', { opacity: 0, y: 20, duration: 0.3, ease: 'power1.out' }, 0);  // stock fade-up
+tl.from('.item', { opacity: 0, stagger: 0.1, ease: 'none' });                   // uniform, linear
+```
+
+**Correct (springs, 3-property entrance, hierarchy in the stagger):**
+
+```js
+tl.fromTo('.hero', { opacity: 0, y: 60, scale: 0.96 },
+  { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: springEase(0.7, 0.75, 22) }, cue.t);
+// supporting items follow the hero by 3-6 frames each, smaller travel, softer spring
+```
+
+### The banned list is a taste layer, not a determinism check
+HyperFrames `check` already rejects seek-unsafe motion. `video-gate.py` adds warnings (file:line) for
+default GSAP eases (`none`, `linear`, `power1*`, `sine*`), CSS `transition:` and default CSS timing
+functions. A grep cannot prove taste: the rubric's motion line is where the agent judges the rest.
+
+### Transitions are designed, not cross-faded
+Carry a shape, direction or velocity across the cut (type becomes a line, a card becomes the next
+scene's frame). The pair critique in `video/loop/self-critique.md` judges exactly this.
+
+## Sources
+
+- `references/raw/video-loop-brief.md` - real assets, closed-form springs, the CSS motion ban
+- `references/raw/claude-remotion-skill.md` - 3-property entrances, 3-6 frame staggers, no linear motion
+- `references/raw/hyperframes-motion-reel-skill.md` - morphing transitions instead of cross-fades
+- `references/raw/hyperframes.md` - template-only sub-composition scripts, determinism rules
