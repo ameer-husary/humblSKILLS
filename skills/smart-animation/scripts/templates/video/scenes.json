@@ -3,6 +3,8 @@
   "pass_score": 8,
   "max_iterations": 5,
   "audio": "sfx",
+  "cut_on": "free",
+  "check_strict": true,
   "shared": [],
   "scenes": [
     {
@@ -13,7 +15,13 @@
     {
       "id": "s02-lockup",
       "intent": "The mark lands on one clean hit and rests as the lockup.",
-      "holds": [{ "from": 1.1, "to": "end", "reason": "logo lockup" }]
+      "holds": [
+        {
+          "from": 1.1,
+          "to": "end",
+          "reason": "logo lockup"
+        }
+      ]
     }
   ]
 }

@@ -3,7 +3,7 @@ title: "Sound: earshot Kits on Picture Cues, Effects-Only by Default"
 context: video
 category: loop
 concept: sound
-description: "Code-made sound for the video loop: scene data-cues become cues.json, an earshot kit renders one take per role, takes land on cues by their measured onset/peak/end, the mix is limited to -14 LUFS / -1 dBTP, and earshot's timeline measures sync on the rendered MP4."
+description: "Code-made sound for the video loop: scene data-cues become cues.json; narration lines (say or local TTS) and earshot kit takes land on their cues; an optional music bed is ducked under the voice; the mix is limited to -14 LUFS / -1 dBTP; earshot measures sync on the rendered MP4."
 tags: video, sound, sfx, earshot, cues, sync, loudness, lufs, beats, music
 sources:
   - "references/raw/earshot.md"
@@ -23,6 +23,22 @@ listening tools that time every sound against its cue on the rendered video.
 ### Modes (`scenes.json` "audio")
 - `sfx` (default): every gesture gets an effect; deliberate silences; no music, no beat grid.
   Suits short and muted-by-default videos.
+- `voice`: narration-led. Lines are cues `{"t": 0.4, "kind": "vo", "text": "..."}` in each scene's
+  `data-cues`; effects and an optional ducked bed sit under them. The voice times the film
+  (`cut_on: "free"`): a measured narrated launch film put only 10% of its cuts on the beat.
+  - `"voice": {"engine": "say", "name": "Reed (English (US))", "rate": 178}` renders each line with
+    macOS `say` (offline). `"engine": "hyperframes"` uses `npx hyperframes tts` (local Kokoro; it
+    needs `kokoro-onnx` in `HYPERFRAMES_PYTHON`, and on 0.8.181 it failed here on an espeak-ng data
+    path baked into the loader). `"engine": "files"` with `"file"` per cue uses recorded lines.
+  - Lines are cached by text in `audio/vo/`, leading silence trimmed so a line starts on its cue;
+    `.loop/voice.json` records each line's start and end. Measure line lengths before timing scenes
+    (`say -o` and ffprobe, or one loop pass): a scene is its line plus 0.5-1 s of breath.
+  - `"bed": {"file": "assets/bed.wav", "db": -6, "duck_db": -5}` loops a bed under everything,
+    ducks it while a line plays (150 ms ramps) and fades it over the last 1.5 s. earshot makes no
+    music: supply a licensed bed, source one via HyperFrames `/media-use`, or synthesize one in code.
+    Level it about 10-12 LU under the voice. At db -17 / duck -8 the critic heard music in only 33%
+    of 5 s windows (the bed sat ~20 dB under); at -6 / -5 gaps measure -16.6 LUFS against a -14 mix
+    and earshot hears a clear 103 BPM pulse under "voice-over narration".
 - `music`: effects plus a music bed you supply as `<audio data-timeline-role="music">` (earshot makes
   no music; HyperFrames `/media-use` can source one). `hyperframes beats` writes the beat grid and
   every scene cut must land within 1 frame of a beat. Give the tracker a full-length track: a 4.2 s
@@ -68,6 +84,10 @@ their cues. A whoosh placed by its apex read -37 ms `near`, because earshot time
 onset: peak/end-aligned roles pass within 100 ms, onset roles need 1 frame.
 
 ### Sound rules the gate enforces
+- Narration lines keep 0.1 s between them and end before the video does.
+- Sync tolerance: 1 frame for onset effects in the clear; 100 ms for apex/end-aligned sounds, for
+  voice lines (speech starts softly: measured +35 to +55 ms after the trimmed start) and for any cue
+  under a voice line (earshot matched a syllable: a click read -40 ms).
 - A take whose earshot audit still flags it after re-rolls (`checks` in `kit.lock.json`) fails the film:
   pick another bank sound for that role.
 - Stacked lockup: no other cue within 3 frames of a `hit` (one clean element carries the lockup).

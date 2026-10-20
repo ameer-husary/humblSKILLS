@@ -120,3 +120,15 @@ Entry shape:
   - Real run verified: plan exit 1 -> honest 7/10 exit 3 -> pass -> deliver exit 0.
 
 [LINT 2026-10-20] 22 wiki, 17 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 18 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[TEST 2026-10-20] Gold-reference test: a narrated product film in a reference's style.
+  - New: scripts/video-reference.sh, wiki/video/loop/reference-style.md, raw/reference-product-film-
+    2026-10-20.md (anonymized), voice mode (say / hyperframes / files) + ducked bed in video-sound.py,
+    cut_on (beat | free), check --strict by default, GSAP vendored by video-init.sh, 23-check test.
+  - Run: reference measured in 20 s; 28 s six-scene film; contrast gate caught copied grays; three
+    critic rounds took scenes 1/6 -> 5/6 and cuts 1/5 -> 3/5; exit 4 at the 5-render cap with
+    s05-fix, s03->s04 and s04->s05 at 7/10. Escalated to the user as the skill prescribes.
+
+[LINT 2026-10-20] 23 wiki, 18 raw. Hard: 0, Soft: 12. Regenerated _index.md.

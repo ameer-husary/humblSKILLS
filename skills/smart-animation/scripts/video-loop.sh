@@ -37,6 +37,9 @@ cfg() { python3 -c "import json,sys; print(json.load(open('scenes.json')).get(sy
 die() { echo "video-loop.sh: $*" >&2; exit 1; }
 epy=${EARSHOT_PYTHON:-python3}
 audio=$(cfg audio sfx)
+cut_on=$(cfg cut_on "")
+[ -n "$cut_on" ] || { [ "$audio" = "music" ] && cut_on=beat || cut_on=free; }
+strict=$(cfg check_strict True)
 fps=$(cfg fps 30)
 mkdir -p .loop renders critique/pairs
 EARSHOT_TESTED=0.3.0   # with commit 925ebe5; video-sound.py uses earshot internals
@@ -58,19 +61,21 @@ if [ "$audio" != "none" ]; then
   [ "$ev" = "$EARSHOT_TESTED" ] || echo "warn  earshot $ev, tested with $EARSHOT_TESTED: re-test video-sound.py before trusting sound results" >&2
   "$epy" "$here/video-sound.py" build . cues.json "$dur" > .loop/sound.json 2> .loop/sound.err || die "sound build failed (.loop/sound.err)"
   echo "sound: $(cat .loop/sound.json)"
-  if [ "$audio" = "music" ]; then
+  if [ "$cut_on" = "beat" ]; then
     hf beats --json > .loop/beats.json 2> .loop/beats.err || die "hyperframes beats failed (.loop/beats.err); a music <audio> needs data-timeline-role=\"music\""
   fi
 fi
 
 # 3. check
-hf check --json > .loop/check.json 2> .loop/check.err
+# --strict turns warnings (sweep_static: nothing moved; held overlaps) into failures
+if [ "$strict" = "True" ]; then hf check --json --strict > .loop/check.json 2> .loop/check.err
+else hf check --json > .loop/check.json 2> .loop/check.err; fi
 python3 - <<'EOF' || die "hyperframes check failed; fix the errors above, then rerun"
 import json, sys
 d = json.load(open('.loop/check.json'))
 for sec in ('lint', 'runtime', 'layout', 'motion', 'contrast'):
     for f in (d.get(sec) or {}).get('findings', []):
-        if f.get('severity') == 'error':
+        if f.get('severity') in (('error', 'warning') if d.get('strict') else ('error',)):
             print(f"check {sec}: {f.get('code')} {f.get('sourceFile', '')} {f.get('selector', '')} {f.get('message', '')}")
 sys.exit(0 if d.get('ok') else 1)
 EOF

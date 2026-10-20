@@ -92,6 +92,7 @@ Context -> categories. See `## Wiki` below for the concept enumeration.
 
 - [plan.md](wiki/video/loop/plan.md) - Plan: Interview, Context, Research, Beat Sheet Before Any Scene
 - [reference-assets.md](wiki/video/loop/reference-assets.md) - Reference and Assets: Real Files, Closed-Form Springs, No Default Motion
+- [reference-style.md](wiki/video/loop/reference-style.md) - Reference Style: Measure a Film, Borrow Its Grammar, Not Its Content
 - [render-engine.md](wiki/video/loop/render-engine.md) - Render Engine: HyperFrames Drafts, One Command, Human Approval
 - [self-critique.md](wiki/video/loop/self-critique.md) - Self-Critique: Per-Scene Scores, Adjacent Pairs, Mechanical Rules
 - [sound.md](wiki/video/loop/sound.md) - Sound: earshot Kits on Picture Cues, Effects-Only by Default
@@ -104,15 +105,16 @@ Context -> categories. See `## Wiki` below for the concept enumeration.
 - [border-beam.md](raw/border-beam.md) - cited by: references/wiki/lib/beams/usage.md
 - [canvas-ui.md](raw/canvas-ui.md) - cited by: references/wiki/lib/canvas-ui/usage.md
 - [claude-remotion-skill.md](raw/claude-remotion-skill.md) - cited by: references/wiki/video/loop/reference-assets.md, references/wiki/video/loop/self-critique.md
-- [earshot.md](raw/earshot.md) - cited by: references/wiki/video/loop/plan.md, references/wiki/video/loop/self-critique.md, references/wiki/video/loop/sound.md
+- [earshot.md](raw/earshot.md) - cited by: references/wiki/video/loop/plan.md, references/wiki/video/loop/reference-style.md, references/wiki/video/loop/self-critique.md, references/wiki/video/loop/sound.md
 - [frontend-design-motion-principles.md](raw/frontend-design-motion-principles.md) - cited by: references/wiki/lang/react/animation.md, references/wiki/motion/principles/design.md
 - [hyperframes-motion-reel-skill.md](raw/hyperframes-motion-reel-skill.md) - cited by: references/wiki/video/loop/reference-assets.md, references/wiki/video/loop/sound.md
-- [hyperframes-planning.md](raw/hyperframes-planning.md) - cited by: references/wiki/video/loop/plan.md
+- [hyperframes-planning.md](raw/hyperframes-planning.md) - cited by: references/wiki/video/loop/plan.md, references/wiki/video/loop/reference-style.md
 - [hyperframes.md](raw/hyperframes.md) - cited by: references/wiki/video/loop/reference-assets.md, references/wiki/video/loop/render-engine.md, references/wiki/video/loop/self-critique.md, references/wiki/video/loop/sound.md
 - [liquid-gooey.md](raw/liquid-gooey.md) - cited by: references/wiki/lib/gooey/usage.md
 - [metal-fx.md](raw/metal-fx.md) - cited by: references/wiki/lib/metal/usage.md
 - [motion-react.md](raw/motion-react.md) - cited by: references/wiki/lib/motion-react/usage.md
 - [react-bits.md](raw/react-bits.md) - cited by: references/wiki/lib/react-bits/usage.md
+- [reference-product-film-2026-10-20.md](raw/reference-product-film-2026-10-20.md) - cited by: references/wiki/video/loop/reference-style.md
 - [thinking-orbs.md](raw/thinking-orbs.md) - cited by: references/wiki/lib/orbs/usage.md
 - [transitions-dev.md](raw/transitions-dev.md) - cited by: references/wiki/lang/ts/animation.md, references/wiki/lib/transitions/usage.md, references/wiki/motion/principles/accessibility.md
 - [video-loop-brief.md](raw/video-loop-brief.md) - cited by: references/wiki/video/loop/plan.md, references/wiki/video/loop/reference-assets.md, references/wiki/video/loop/render-engine.md, references/wiki/video/loop/self-critique.md, references/wiki/video/loop/sound.md
@@ -127,6 +129,7 @@ Context -> categories. See `## Wiki` below for the concept enumeration.
 - [scripts/video-gate.py](../scripts/video-gate.py)
 - [scripts/video-init.sh](../scripts/video-init.sh)
 - [scripts/video-loop.sh](../scripts/video-loop.sh)
+- [scripts/video-reference.sh](../scripts/video-reference.sh)
 - [scripts/video-sound.py](../scripts/video-sound.py)
 
 <!-- GENERATED:END -->

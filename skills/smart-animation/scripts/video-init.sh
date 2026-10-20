@@ -33,11 +33,17 @@ mkdir -p "$dir/compositions" "$dir/assets" "$dir/audio" "$dir/critique/pairs"
 cp "$tpl/compositions/"*.html "$dir/compositions/"
 cp "$tpl/scenes.json" "$dir/scenes.json"
 cp "$tpl/PLAN.md" "$dir/PLAN.md"
+# GSAP vendored into the project: renders never depend on a CDN being up or unchanged
+mkdir -p "$dir/assets/vendor"
+curl -fsSL "https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" -o "$dir/assets/vendor/gsap.min.js" \
+  || { echo "video-init.sh: could not download gsap 3.14.2" >&2; exit 1; }
 cat > "$dir/assets/SOURCES.md" <<'EOF'
 # Asset sources
 
 One line per file in assets/: `<filename> - <where it came from> - <license or owner>`.
 The loop fails a scene that uses an asset not listed here, or a placeholder image host.
+
+gsap.min.js - GSAP 3.14.2 from jsDelivr (vendor/) - GreenSock standard license
 EOF
 cat >> "$dir/.gitignore" <<'EOF'
 renders/

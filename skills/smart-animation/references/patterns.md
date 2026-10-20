@@ -39,3 +39,24 @@ Entry shape:
   0.90 s that the film-wide sheet hid. A fixed 6x6 contact sheet padded a 3.5 s video with black
   tiles that read as black frames; grid sized to the frame count with gray padding instead.
 - Lesson: judge sound per scene; never pad evidence images with black.
+
+### 2026-10-20 | Narrated product film from a reference (26.8 s, 6 scenes, voice + bed + ticks)
+- Context: test of reference -> STYLE.md -> PLAN -> scenes -> loop, macOS `say` voice, synthesized 103 BPM bed.
+- Result: video-reference.sh on a 168 s 4K film took 20 s; the accent covered 0.05% of pixels and
+  needed a saturated-pixel histogram (threshold 0.01% of pixels). Draft 1 failed the contrast gate
+  on copied grays (2.55:1); draft 2 failed on frozen openings (a 16 px cursor on an empty ground) and
+  speech sync (+35/+55 ms); draft 3 was mechanically clean after a moving glow on the open, cards
+  assembling from 0.1 s, and the tagline resolving word by word with the voice.
+- Lesson: in narrated films, animate words with the voice and never open on an almost-empty frame;
+  measure line lengths before timing scenes.
+
+### 2026-10-20 | Narrated test film through three critic rounds (6 scenes, 11 units, cap 5)
+- Context: 28 s film in a reference's grammar; independent critic subagents per round (scenes, cuts).
+- Result: scenes passing 1/6 -> 3/6 -> 5/6; cuts 1/5 -> 2/5 -> 3/5; the loop hit the 5-render cap
+  (two renders went to mechanical fixes: contrast, frozen openings) and exited 4 with three units at 7.
+  Critics were specific and mostly consistent; one contradiction (accent vs hatch for the problem
+  bar) came from a vague PLAN row and was settled by rewriting the row.
+- Worked: fix notes from the critics, applied all at once per render; carrying an element across cuts.
+- Didn't: fading to empty ground (4/5 cuts in round 1); a per-scene push restarting at every cut.
+- Lesson: a 5+ scene film needs more than 5 renders to clear every unit; ask the user to raise
+  max_iterations up front for long films instead of discovering the cap at the end.

@@ -109,11 +109,12 @@ and `references/wiki/motion/principles/accessibility.md` (reduced-motion floor +
 
 **And route video work (a rendered MP4, not live UI motion):**
 
-- **Make / fix an animation video (plan, render loop, scoring, sound):** Read all five
+- **Make / fix an animation video (plan, render loop, scoring, sound):** Read the
   `references/wiki/video/loop/` concepts in order: `plan.md` (interview, context, research, beat sheet,
-  approval - before any scene), `render-engine.md` (HyperFrames, one command, delivery and review),
+  approval - before any scene), `reference-style.md` (when the user gives a "make it like this" video:
+  measure it, borrow its grammar, copy nothing brand-specific), `render-engine.md` (HyperFrames, one command, delivery and review),
   `reference-assets.md` (real assets, closed-form springs, banned defaults), `sound.md` (earshot kits
-  on picture cues, effects-only default, music mode) and `self-critique.md` (reasoned rubric, adjacent
+  on picture cues; effects-only default, narrated voice mode with a ducked bed, music mode) and `self-critique.md` (reasoned rubric, adjacent
   pairs, critic subagent, mechanical rules, exit codes). Install HyperFrames' own skills
   (`npx hyperframes skills update`) for the composition contract.
 
@@ -134,8 +135,10 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
   check -> draft render -> dead frames, earshot listening, frames for changed scenes and cuts -> gate.
   Exit 0 pass, 1 plan not ready or tool error, 2 waiting for scores, 3 failing, 4 iteration cap.
   `--deliver` then renders the final, re-checks it, and writes a poster and review frames. Set `EARSHOT_PYTHON`.
-- `scripts/tests/test_video_gate.py` — hermetic gate test (21 checks, no HyperFrames or earshot).
+- `scripts/tests/test_video_gate.py` — hermetic gate test (23 checks, no HyperFrames or earshot).
 - `scripts/dead-frames.sh <mp4>` — freeze/black stretches from the encoded pixels (TSV).
+- `scripts/video-reference.sh <ref.mp4> <dir>` — measure a reference video (cuts, palette and small
+  accents, loudness, earshot sound summary, motion strips) into a STYLE.md to fill.
 - `scripts/video-sound.py`, `scripts/video-gate.py` — the sound build/listen and the gate, called by
   `video-loop.sh`.
 
@@ -172,6 +175,17 @@ Read `references/_brain.md`. **Wiki concept file shape:** Read `references/_temp
    subagent (prompt in `self-critique.md`), apply the fix notes, rerun. Exit 3 means fixes to apply.
 5. At exit 0, run `video-loop.sh --deliver launch`, look through `critique/final/frames`, then ask the
    user to watch `renders/final.mp4` with sound. At exit 4, stop and show the user what still fails.
+
+### Example 4: "Make a video like this one" (a narrated product film, reference attached)
+
+1. `bash scripts/video-init.sh film`, then `bash scripts/video-reference.sh ref.mp4 film/reference`
+   and the smart-watch skill on `ref.mp4` for the transcript; fill the style sheet in your own words.
+2. Plan with the user: the message, the story spine, one narration line per scene. Measure each line
+   (`say -o` + ffprobe) and size scenes as line + 0.5-1 s.
+3. `scenes.json`: `"audio": "voice"`, `"cut_on": "free"`, a `voice` engine, a `bed`. Each scene's
+   `data-cues` holds its line (`kind: vo`) and its UI ticks; words resolve with the voice.
+4. Loop, critics, `--deliver` as in Example 3. Keep the reference's grammar, not its brand: its
+   grays may fail contrast, its master may clip - the gate stays at AA and -1 dBTP.
 
 ## Troubleshooting
 

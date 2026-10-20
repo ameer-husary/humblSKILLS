@@ -221,3 +221,24 @@ Entry shape:
   reviewed once at the end by the agent and then the user, as the user chose.
 - Result: hermetic test, 21 checks; real run: plan gate exit 1, hold cap caught the starter's 56%
   lockup, honest 7/10 scores exit 3, deliver exit 0 with poster and frames.
+
+### 2026-10-20 | Narrated films: voice mode, cuts follow the voice, looser sync under speech
+- Context: the user's gold reference is a narrated product film. The loop had no narration, and
+  music mode forced cuts onto the beat, but the reference puts only 10% of its cuts on the beat.
+- Options: (A) leave narration to HyperFrames' own workflows, (B) add a "voice" mode to video-sound.py
+  (lines as cues, cached per text, a ducked bed), (C) generate narration from word-level transcripts.
+- Chose: (B), plus `cut_on` (beat | free) decoupled from the audio mode.
+- Why: lines as cues keep one timing source (data-cues) and make line timing known by construction,
+  so no transcription step is needed. `say` is offline and always present on macOS; HyperFrames'
+  local Kokoro TTS failed on 0.8.181 (espeak-ng data path baked into the loader), so it is optional.
+  earshot times speech late (+35..+55 ms) and matches syllables, so voice lines and cues under a
+  line get the 100 ms window; onset effects in the clear keep 1 frame.
+- Result: a 26.8 s six-scene narrated test film reached a mechanically clean draft on iteration 3.
+
+### 2026-10-20 | Borrow a reference's grammar, never its content; adapt it to the floors
+- Context: "make it like this" briefs invite copying.
+- Chose: video-reference.sh measures the film; the agent writes the grammar in its own words into
+  STYLE.md with an explicit "what NOT to copy"; the reference record in raw/ is anonymized.
+- Why: the public skill must not carry a private brand, and a reference can be below the gate:
+  its secondary gray measured 2.55:1 (fails AA) and its master clips at +0.1 dBTP.
+- Result: HyperFrames' contrast gate caught the copied grays on the first run; darker grays passed.

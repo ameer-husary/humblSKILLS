@@ -42,7 +42,9 @@ A (user): "README and the launch tweet, muted."   -> recorded under 1. Brief
 2. **Context (gathered):** the facts the video states, each with its source; brand files (logo, colors,
    fonts) placed in `assets/` and listed in `SOURCES.md`; who supplies real captures. Read the product,
    repo or page itself: visuals should come from the subject, not from stock ideas.
-3. **Research:** 2-3 reference videos and the one technique to take from each (for sound, the earshot
+3. **Research:** 2-3 reference videos and the one technique to take from each. When the user hands
+   over a target video, run `scripts/video-reference.sh` on it first and fill its STYLE.md
+   (`video/loop/reference-style.md`); its measured numbers become the plan's targets (for sound, the earshot
    launch film: one effect per gesture, deliberate silences, one clean hit on the lockup).
 4. **Beat sheet:** open with "This video tells [audience] that [message]." One row per scene: id (must
    match `scenes.json`), beat, seconds, on screen, sound cues (kind @ s), and **why**, traced to the

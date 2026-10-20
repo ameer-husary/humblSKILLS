@@ -235,13 +235,17 @@ def sound_findings(project, cfg, fps, listen='critique/audio/listen.json'):
     if tl is None:
         return {}, ['no listening report: earshot did not run (set EARSHOT_PYTHON)']
     lock = load(project, 'audio/kit/kit.lock.json', {}).get('roles', {})
+    lines = load(project, '.loop/voice.json', [])
     per, film = {}, []
     for it in (tl.get('sync', {}).get('cues') or {}).get('items', []):
         off = it.get('offset_ms')
-        # earshot times an event at its onset, so a whoosh placed by its apex (align peak / end)
-        # reads early by design: those roles pass on any answer within 100 ms, onset roles need 1 frame
+        # earshot times an event at its onset. Loose (any answer within 100 ms): a whoosh placed by its apex
+        # (align peak / end); a voice line (speech starts softly: measured +35..+55 ms); any cue under a
+        # voice line (onsets match syllables: a click read -40 ms). Onset effects in the clear need 1 frame.
         align = (lock.get(it.get('kind')) or {}).get('align', 'onset')
-        ok = ('OK',) if align == 'onset' else ('OK', 'near', 'swell', 'peak')
+        under = any(ln['t'] - 0.05 <= it['t'] <= ln['end'] for ln in lines)
+        loose = align != 'onset' or it.get('kind') == 'vo' or under
+        ok = ('OK', 'near', 'swell', 'peak') if loose else ('OK',)
         if it.get('status') not in ok:
             per.setdefault(it.get('id'), []).append(
                 f"{it.get('kind')} at {it['t']:.2f} s: {it.get('status')}" + (f' ({off:+.0f} ms)' if off is not None else ''))
@@ -255,8 +259,16 @@ def sound_findings(project, cfg, fps, listen='critique/audio/listen.json'):
     evs = load(project, 'cues.json', {}).get('events', [])
     for h in (e for e in evs if e['kind'] == 'hit'):
         for e in evs:
-            if e is not h and abs(e['t'] - h['t']) <= 3.0 / fps:
+            if e is not h and e['kind'] != 'vo' and abs(e['t'] - h['t']) <= 3.0 / fps:
                 per.setdefault(h.get('id'), []).append(f"stacked lockup: {e['kind']} {e['t'] - h['t']:+.3f} s from the hit")
+    # narration: lines never talk over each other and never run past the video
+    dur = (load(project, '.loop/timeline.json') or {}).get('timeline', {}).get('duration')
+    for a, b in zip(lines, lines[1:]):
+        if a['end'] + 0.1 > b['t']:
+            per.setdefault(b['id'], []).append(f"vo at {b['t']:.2f} s starts {a['end'] + 0.1 - b['t']:.2f} s too early "
+                                               f"(previous line ends {a['end']:.2f} s; keep 0.1 s between lines)")
+    if lines and dur and lines[-1]['end'] > dur:
+        per.setdefault(lines[-1]['id'], []).append(f"vo runs {lines[-1]['end'] - dur:.2f} s past the end of the video")
     lo = tl.get('loudness', {})
     lufs, tp = lo.get('integrated_lufs'), lo.get('true_peak_dbtp')
     target = cfg.get('lufs', -14.0)
@@ -338,9 +350,11 @@ def cmd_report(project, mp4):
     assets = asset_findings(project, cfg, times)
     audio = cfg.get('audio', 'sfx')
     sync, film = sound_findings(project, cfg, fps) if audio != 'none' else ({}, [])
-    beats = beat_times(project) if audio == 'music' else None
-    if audio == 'music' and beats is None:
-        film.append('audio is "music" but no beats/*.json (run hyperframes beats with a music <audio>)')
+    # cutting on the beat is a style choice: default on for "music", off for narrated or effects-only films
+    cut_on = cfg.get('cut_on', 'beat' if audio == 'music' else 'free')
+    beats = beat_times(project) if cut_on == 'beat' else None
+    if cut_on == 'beat' and beats is None:
+        film.append('cut_on is "beat" but no beats/*.json (run hyperframes beats with a music <audio>)')
 
     unscored, failing = [], []
     for kind, key, h, stub, t0, t1 in units(project, cfg, times):

@@ -61,7 +61,9 @@ The reason should cite a frame, a timestamp or a number, so the next iteration k
 |---|---|---|
 | Frozen picture | freeze >= 0.5 s outside the scene's declared `holds` | FFmpeg freezedetect n=0.0003 on the MP4 |
 | Black picture | any blackdetect stretch (0.1 s) outside holds | FFmpeg blackdetect |
-| Sound off its cue | onset roles > 1 frame; peak/end roles > 100 ms | earshot timeline |
+| Sound off its cue | onset effects in the clear > 1 frame; apex/end-aligned, voice lines and cues under a voice line > 100 ms | earshot timeline |
+| Narration overlap | a voice line starts < 0.1 s after the previous ends, or runs past the video | .loop/voice.json |
+| Strict check | any HyperFrames `check --strict` warning (`check_strict`, default true); WCAG contrast failures are errors even without it | hyperframes check |
 | Loudness | integrated outside -14 +-1 LUFS, or true peak > -1 dBTP | earshot timeline |
 | Cut off the beat (music mode) | > 1 frame from the nearest beat | hyperframes beats |
 | Dirty take | an earshot audit warning left after re-rolls | kit.lock.json |
@@ -75,6 +77,8 @@ printed in each stub and capped at 40% of the scene: never add a hold, raise a t
 `pass_score` to get through. Those are the user's calls. (The starter's lockup first held 56% of its
 scene; the cap caught it, and the scene was shortened to 1.8 s.) FFmpeg's
 common n=0.003 missed real motion of a 100 px word on 1080p; 0.0003 matched the frames.
+Noisy grounds (film grain, a drifting gradient, a slow glow) change every frame, so they can hide a
+dead moment from freezedetect: on such grounds the agent checks rests in the frames itself.
 There is no separate "blank frame" rule. A blank-but-not-black frame (an empty light background)
 only shows up when it lasts long enough to read as a freeze, so the agent still opens the first and
 last frames itself. The starter's first draft held an empty canvas for 0.5 s after the word swept

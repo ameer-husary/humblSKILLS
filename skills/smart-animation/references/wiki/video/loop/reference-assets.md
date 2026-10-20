@@ -68,6 +68,24 @@ functions. A grep cannot prove taste: the rubric's motion line is where the agen
 Carry a shape, direction or velocity across the cut (type becomes a line, a card becomes the next
 scene's frame). The pair critique in `video/loop/self-critique.md` judges exactly this.
 
+The most common failure, measured on a six-scene narrated test film: four of five cuts faded to an
+empty ground for 0.4-0.7 s before the next scene drew itself (pair scores 4-7). What fixed them:
+- **End a scene in the next scene's first state.** The last frame of scene A and the first frame of
+  scene B are the same picture: the dashboard stays, the accent bar stays put, the cursor is where
+  the next element appears. Scene B never fades in what is already on screen.
+- **Morph one element into the next scene's anchor:** a card becomes row 1 of a list, three rows
+  close into a frame that grows into a dashboard, a card folds into the accent square of the logo.
+- **Morph with transforms, not layout:** animate `x/y/scaleX/scaleY` from `transform-origin: 0 0`
+  between the two boxes. Tweening `left/top/width/height` fails HyperFrames `check --strict`
+  (`gsap_non_transform_motion`) and breaks this skill's compositor-only rule.
+- **Start the next scene moving at 0.0 s.** A scene whose first element arrives at 0.5 s leaves a
+  dead half-second the freeze rule catches.
+- **A slow push must be continuous across cuts.** Scene A pushing 1 -> 1.035 and scene B restarting
+  at 1 reads as a visible scale snap at every cut (earshot's cut detector even marked two). Alternate:
+  A 1 -> 1.02, B 1.02 -> 1, so each scene starts at the scale the last one ended on.
+- **The cursor always has a target** (the word just resolved, the row being checked, the bar that
+  moved) and never parks on top of text: critics marked idle or colliding cursors in 4 of 6 scenes.
+
 ## Sources
 
 - `references/raw/video-loop-brief.md` - real assets, closed-form springs, the CSS motion ban

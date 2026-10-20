@@ -55,7 +55,10 @@ await page.goto(url); for (let f = 0; f < 300; f++) { await page.screenshot({ pa
 - **Shipping in an app or page:** use the poster as the `prefers-reduced-motion` fallback, start
   muted, never autoplay with sound, and give a replay control. These follow the skill's accessibility
   floor (`motion/principles/accessibility.md`).
-- Projects pin `hyperframes@<version>` in `package.json`; the loop uses that pin.
+- Projects pin `hyperframes@<version>` in `package.json`; the loop uses that pin, and `video-init.sh`
+  vendors GSAP 3.14.2 into `assets/vendor/` so a render never depends on a CDN.
+- `check --strict` by default (`scenes.json` `check_strict`): warnings such as `sweep_static` and
+  contrast fail the pass instead of scrolling by.
 
 ## Sources
 

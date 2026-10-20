@@ -167,6 +167,17 @@ def main():
         code, out = run('report', d, 'x.mp4')
         expect(code == 0, 'back to clean -> pass', out)
 
+        write(f'{d}/.loop/voice.json', [{'id': 'a', 't': 0.2, 'end': 1.45, 'text': 'one'},
+                                         {'id': 'b', 't': 1.5, 'end': 3.0, 'text': 'two'}])
+        code, out = run('report', d, 'x.mp4')
+        expect(code == 3 and 'starts 0.05 s too early' in out, 'narration lines need 0.1 s between them', out)
+        write(f'{d}/.loop/voice.json', [{'id': 'a', 't': 0.2, 'end': 1.3, 'text': 'one'}])
+        listen['sync']['cues']['items'][0]['status'] = 'near'  # the key at 0.3 s now sits under a voice line
+        write(f'{d}/critique/audio/listen.json', listen)
+        code, out = run('report', d, 'x.mp4')
+        expect(code == 0, 'a cue under a voice line passes within 100 ms', out)
+        listen['sync']['cues']['items'][0]['status'] = 'OK'
+        write(f'{d}/.loop/voice.json', [])
         write(f'{d}/critique/final/listen.json', listen)
         write(f'{d}/.loop/dead-final.tsv', 'black\t0.000\t0.200\n')
         code, out = run('final', d, 'final.mp4')
