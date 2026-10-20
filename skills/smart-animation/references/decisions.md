@@ -158,3 +158,87 @@ Entry shape:
   keyframes) and is the signal to watch.
 - Result: no scope change. Revisit when a second non-motion component library
   is worth documenting.
+
+### 2026-10-20 | Video loop: HyperFrames + earshot, script/agent split
+- Context: extend the skill from live UI motion to code-built videos with a render -> critique loop
+  (brief: `raw/video-loop-brief.md`).
+- Options: (A) Remotion, (B) HyperFrames, (C) a custom Puppeteer + FFmpeg renderer.
+- Chose: (B) HyperFrames for picture, earshot for sound; the skill only orchestrates and gates.
+- Why: Remotion needs a paid company license at 4+ employees; HyperFrames is Apache-2.0, already
+  seeks frames deterministically and exposes `timeline --json`, `check --json`, `snapshot`, `beats`.
+  A custom renderer would duplicate all of it. earshot (MIT) is the only tool found that both makes
+  effects in code with measured sync points and measures sync on a rendered video.
+- Result: the starter project goes scaffold -> pass in 4 loop runs; first run 64 s including the
+  earshot listen pass, reruns with unchanged inputs skip the render.
+
+### 2026-10-20 | Who scores, and what never gates
+- Context: a bash script cannot judge a frame; an agent judging its own source is unreliable.
+- Options: (A) script calls a vision model, (B) agent writes scores into stubs the script reads,
+  (C) fully manual review.
+- Chose: (B). The script writes evidence + stubs and enforces measurable rules; the agent scores
+  from full-size frames; the next run gates.
+- Why: (A) hides the judgement and adds an API key; (B) keeps the loop resumable from files.
+  earshot `critique` and `realness` inform the rubric but never gate: earshot's own docs say both
+  can be pleased without the sound improving.
+- Result: stale scores are cleared by a per-unit source hash, verified (edit -> exit 2).
+
+### 2026-10-20 | "Groups of two" = adjacent scene pairs
+- Context: the brief's "checks scenes in groups of two" had three readings: two critics, two
+  passes in a row, adjacent pairs.
+- Options: (A) two critics, min score, (B) pass streak of two, (C) adjacent pairs judged on the cut.
+- Chose: (C), left to the best-performing option by the user.
+- Why: per-scene scoring never looks at a cut; pairs are the only reading that adds coverage.
+  A critic subagent (A's benefit) is still recommended in `self-critique.md`.
+- Result: TBD on a real multi-scene video.
+
+### 2026-10-20 | Effects-only sound by default; music mode optional
+- Context: the brief said "cuts land on the beat", but short, often-muted intros read better with
+  sparse effects (the earshot launch film has no music and eight deliberate silences).
+- Options: (A) always music + beat grid, (B) effects only, (C) both, effects default.
+- Chose: (C), confirmed by the user.
+- Why: earshot makes effects but no music; beat-locking only means something with a bed.
+- Result: `scenes.json` "audio": sfx | music | none; the beat check runs only in music mode.
+
+### 2026-10-20 | Cues live on the scene root (data-cues), not in scenes.json
+- Context: picture and sound must share one timing source or they drift.
+- Options: (A) cue times in scenes.json, (B) a shared JS module, (C) a `data-cues` JSON attribute
+  on each scene root that the scene's own timeline is built from.
+- Chose: (C).
+- Why: sub-compositions cannot fetch files (determinism) and their `<head>` is discarded, so (A)
+  and (B) cannot feed the timeline; an attribute is readable by both the timeline and the gate.
+- Result: keys and the hit measured 0-2 ms from their cues on the rendered MP4.
+
+### 2026-10-20 | Hardening the loop after review (plan gate, reasoned scores, delivery check)
+- Context: a gap review found ways a bad video could pass: bare scores, shared edits keeping old
+  scores, holds hiding freezes, an unchecked delivery render, and no planning before the first scene.
+- Options: per gap, (A) document the rule only, (B) enforce it in video-gate.py.
+- Chose: (B) for each, at the smallest size: rubric lines must carry 0-2 + a reason and sum to the
+  score; index.html plus scenes.json "shared" globs enter every fingerprint; holds capped at 40% of a
+  scene; `--deliver` re-runs dead frames and listening on the encoded final and writes poster +
+  review frames; PLAN.md must be filled, cover every scene and carry an `approved:` line.
+- Why: each gap was an honest-agent failure mode, not only a cheating one (a forgotten font edit, a
+  long lockup). Critique evidence stays on preview snapshots (fast, per unit); the encoded video is
+  reviewed once at the end by the agent and then the user, as the user chose.
+- Result: hermetic test, 21 checks; real run: plan gate exit 1, hold cap caught the starter's 56%
+  lockup, honest 7/10 scores exit 3, deliver exit 0 with poster and frames.
+
+### 2026-10-20 | Narrated films: voice mode, cuts follow the voice, looser sync under speech
+- Context: the user's gold reference is a narrated product film. The loop had no narration, and
+  music mode forced cuts onto the beat, but the reference puts only 10% of its cuts on the beat.
+- Options: (A) leave narration to HyperFrames' own workflows, (B) add a "voice" mode to video-sound.py
+  (lines as cues, cached per text, a ducked bed), (C) generate narration from word-level transcripts.
+- Chose: (B), plus `cut_on` (beat | free) decoupled from the audio mode.
+- Why: lines as cues keep one timing source (data-cues) and make line timing known by construction,
+  so no transcription step is needed. `say` is offline and always present on macOS; HyperFrames'
+  local Kokoro TTS failed on 0.8.181 (espeak-ng data path baked into the loader), so it is optional.
+  earshot times speech late (+35..+55 ms) and matches syllables, so voice lines and cues under a
+  line get the 100 ms window; onset effects in the clear keep 1 frame.
+- Result: a 26.8 s six-scene narrated test film reached a mechanically clean draft on iteration 3.
+
+### 2026-10-20 | Borrow a reference's grammar, never its content; adapt it to the floors
+- Context: "make it like this" briefs invite copying.
+- Chose: video-reference.sh measures the film; the agent writes the grammar in its own words into
+  STYLE.md with an explicit "what NOT to copy"; the reference record in raw/ is anonymized.
+- Why: the public skill must not carry a private brand, and a reference can be below the gate:
+  its secondary gray measured 2.55:1 (fails AA) and its master clips at +0.1 dBTP.
+- Result: HyperFrames' contrast gate caught the copied grays on the first run; darker grays passed.

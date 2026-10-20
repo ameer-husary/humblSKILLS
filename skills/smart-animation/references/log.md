@@ -87,3 +87,58 @@ Entry shape:
     list updated so the skill can actually be selected for gooey work.
 
 [LINT 2026-08-12] 17 wiki, 11 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[INGEST 2026-10-20] Added the code-built video loop; version 0.5.0 -> 0.6.0.
+  - raw: video-loop-brief.md (the three-stage loop + decisions taken with the user), hyperframes.md,
+    earshot.md (incl. FFmpeg measurements of the earshot launch film), claude-remotion-skill.md,
+    hyperframes-motion-reel-skill.md.
+  - wiki/video/loop/: render-engine, reference-assets, sound, self-critique (new context `video`).
+  - scripts: video-init.sh, video-loop.sh, dead-frames.sh (bash 3.2), video-gate.py (stdlib),
+    video-sound.py (earshot), templates/video/ (2 spring scenes with data-cues, scenes.json).
+  - Verified end to end in a scratch project: exit 2 (unscored) -> 3 (6/10) -> 0 (pass) ->
+    2 after a scene edit (stale score cleared) -> 4 at the iteration cap; music mode caught a cut
+    5.9 frames off the beat.
+  - Sound rules: stacked lockup verified (a pop 50 ms after the hit failed the scene); the dirty-take
+    rule is untested because every calm-preset take is clean.
+  - 5 decisions recorded; 1 patterns entry with timings and thresholds.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 21 wiki, 16 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 22 wiki, 17 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[UPDATE 2026-10-20] Loop hardening after the gap review (same PR, still 0.6.0).
+  - New: wiki/video/loop/plan.md, raw/hyperframes-planning.md, templates/video/PLAN.md,
+    scripts/tests/test_video_gate.py (21 hermetic checks).
+  - video-gate.py: reasoned rubric (0-2 + reason per line, sum = score), shared fingerprint
+    (index.html + scenes.json "shared"), hold cap (max_hold_share 0.4), `final`, `plan`, `scenes`.
+  - video-loop.sh: plan gate, earshot version warning, per-scene sound.png, `--deliver`.
+  - Starter lockup shortened to 1.8 s (its hold covered 56%). Self-critique gains a critic-subagent prompt.
+  - Real run verified: plan exit 1 -> honest 7/10 exit 3 -> pass -> deliver exit 0.
+
+[LINT 2026-10-20] 22 wiki, 17 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 18 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[TEST 2026-10-20] Gold-reference test: a narrated product film in a reference's style.
+  - New: scripts/video-reference.sh, wiki/video/loop/reference-style.md, raw/reference-product-film-
+    2026-10-20.md (anonymized), voice mode (say / hyperframes / files) + ducked bed in video-sound.py,
+    cut_on (beat | free), check --strict by default, GSAP vendored by video-init.sh, 23-check test.
+  - Run: reference measured in 20 s; 28 s six-scene film; contrast gate caught copied grays; three
+    critic rounds took scenes 1/6 -> 5/6 and cuts 1/5 -> 3/5; exit 4 at the 5-render cap with
+    s05-fix, s03->s04 and s04->s05 at 7/10. Escalated to the user as the skill prescribes.
+
+[LINT 2026-10-20] 23 wiki, 18 raw. Hard: 0, Soft: 12. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
+
+[TEST 2026-10-20] Same film, cap 8, Chatterbox voice, motion.js. Units passing: 2 -> 4 -> 8 -> 8 -> 8 -> 9
+  of 11. Exit 4 at 8/8 (s05-fix 7, s05->s06 7). Added: Chatterbox engine, templates/video/motion.js,
+  plan questions for voice engine and iteration budget, cut/sound/critic lessons in the wiki.
+
+[LINT 2026-10-20] 23 wiki, 19 raw. Hard: 0, Soft: 13. Regenerated _index.md.
