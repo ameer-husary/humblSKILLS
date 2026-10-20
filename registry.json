@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-20T21:33:01Z",
+  "generated_at": "2026-10-20T22:27:57Z",
   "source": {
     "repo": "github.com/jjfantini/humblSKILLS",
     "ref": "main",
-    "sha": "64e3fea2e0e44256151fee490d1720c23f91b434"
+    "sha": "dcbe1965796696c3bee95434b6ab0576b103664e"
   },
   "skills": [
     {
@@ -496,7 +496,7 @@
         "use-smart-animation"
       ],
       "path": "skills/smart-animation",
-      "dir_sha": "f54bda3fa755d3c3d77e40b1d2dcb964eab5bf963cdcf292a4f4ce5b8e74d3c0"
+      "dir_sha": "3f22a2d05b5d2c203c9eb6634b95aacd890d18dd19fcc2cb770d1e387f4db1bc"
     },
     {
       "name": "smart-claude-init",
