@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.56.0](https://github.com/jjfantini/humblSKILLS/compare/v2.55.1...v2.56.0) (2026-10-20)
+
+
+### Features
+
+* **smart-animation:** add HyperFrames + earshot video loop ([b160989](https://github.com/jjfantini/humblSKILLS/commit/b16098904c5ed7939f89e86529b31f20aead5213))
+* **smart-animation:** add HyperFrames + earshot video loop ([7438e3d](https://github.com/jjfantini/humblSKILLS/commit/7438e3da12260400675a3d3d056125fc44a08156))
+* **smart-animation:** Chatterbox narration and shipped motion helpers ([6ebce8b](https://github.com/jjfantini/humblSKILLS/commit/6ebce8b4083d9d9e32c32444bc21039ca84877e2))
+* **smart-animation:** harden the video loop with a plan gate and delivery check ([ee9a97a](https://github.com/jjfantini/humblSKILLS/commit/ee9a97aee7a725aa9b1d1a709c9b5a110cf74ee9))
+* **smart-animation:** narrated films, reference-style extraction, strict check ([dcbe196](https://github.com/jjfantini/humblSKILLS/commit/dcbe1965796696c3bee95434b6ab0576b103664e))
+
+
+### Bug Fixes
+
+* **smart-animation:** default the music bed to the measured level ([1dded00](https://github.com/jjfantini/humblSKILLS/commit/1dded00a0b9a1918c01961cfcb3fb8a570613443))
+
 ## [2.56.0-pre](https://github.com/jjfantini/humblSKILLS/compare/v2.55.1...v2.56.0-pre) (2026-10-20)
 
 
